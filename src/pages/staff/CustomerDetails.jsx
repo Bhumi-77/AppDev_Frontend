@@ -1,9 +1,38 @@
 import { useEffect, useState } from "react";
-import axios from "../../api/axios";
 import { useParams } from "react-router-dom";
+import axios from "../../api/axios";
 
+// ✅ styles must be defined BEFORE the component
+const styles = {
+  wrapper: { padding: "1rem 0", fontFamily: "sans-serif" },
+  header: { display: "flex", gap: 12, alignItems: "center", marginBottom: "1.5rem" },
+  avatar: { width: 48, height: 48, borderRadius: "50%", background: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 500, fontSize: 15, color: "#0C447C", flexShrink: 0 },
+  custName: { margin: 0, fontSize: 18, fontWeight: 500 },
+  custPhone: { margin: "2px 0 0", fontSize: 13, color: "#888" },
+  statsGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: "1.5rem" },
+  statCard: { background: "#f5f5f5", borderRadius: 8, padding: "12px 16px", textAlign: "center" },
+  statLabel: { fontSize: 12, color: "#888", margin: "0 0 4px" },
+  statValue: { fontSize: 22, fontWeight: 500, margin: 0 },
+  tabs: { display: "flex", gap: 8, marginBottom: "1.25rem" },
+  tabBtn: { padding: "6px 16px", fontSize: 14, border: "0.5px solid #ccc", background: "transparent", borderRadius: 8, cursor: "pointer", color: "#555" },
+  tabActive: { background: "#E6F1FB", color: "#0C447C", borderColor: "transparent" },
+  card: { background: "#fff", border: "0.5px solid #e0e0e0", borderRadius: 12, padding: "1rem 1.25rem", marginBottom: "1rem" },
+  itemRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "0.5px solid #eee" },
+  itemTitle: { fontWeight: 500, fontSize: 14 },
+  itemSub: { color: "#888", fontSize: 13 },
+  sectionTitle: { fontSize: 13, fontWeight: 500, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 10px" },
+  input: { fontSize: 14, padding: "7px 12px", border: "0.5px solid #ccc", borderRadius: 8, width: "100%", boxSizing: "border-box" },
+  primaryBtn: { background: "#E6F1FB", color: "#0C447C", border: "none", padding: "8px 20px", borderRadius: 8, fontSize: 14, cursor: "pointer", fontWeight: 500 },
+  dangerBtn: { background: "#FCEBEB", color: "#A32D2D", border: "none", padding: "6px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer" },
+  badgeBlue: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#E6F1FB", color: "#0C447C" },
+  badgeGreen: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#EAF3DE", color: "#27500A" },
+  badgeAmber: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#FAEEDA", color: "#633806" },
+  empty: { color: "#888", fontSize: 14, textAlign: "center", padding: "1.5rem 0" },
+};
+
+// ✅ component comes AFTER styles
 export default function CustomerDetails() {
-  const { id } = useParams(); {
+  const { id } = useParams();
   const [customer, setCustomer] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -76,13 +105,12 @@ export default function CustomerDetails() {
   }
 
   if (loading) return <p style={styles.empty}>Loading...</p>;
-  if (error) return <p style={{ ...styles.empty, color: "var(--color-text-danger)" }}>{error}</p>;
+  if (error) return <p style={{ ...styles.empty, color: "red" }}>{error}</p>;
   if (!customer) return null;
 
   return (
     <div style={styles.wrapper}>
 
-      {/* Header */}
       <div style={styles.header}>
         <div style={styles.avatar}>{getInitials(customer.name)}</div>
         <div style={{ flex: 1 }}>
@@ -95,14 +123,12 @@ export default function CustomerDetails() {
         </button>
       </div>
 
-      {/* Stats */}
       <div style={styles.statsGrid}>
         <div style={styles.statCard}><p style={styles.statLabel}>Vehicles</p><p style={styles.statValue}>{vehicles.length}</p></div>
         <div style={styles.statCard}><p style={styles.statLabel}>Invoices</p><p style={styles.statValue}>{invoices.length}</p></div>
         <div style={styles.statCard}><p style={styles.statLabel}>Total spent</p><p style={styles.statValue}>${totalSpent()}</p></div>
       </div>
 
-      {/* Tabs */}
       <div style={styles.tabs}>
         {["vehicles", "invoices", "add"].map((tab) => (
           <button
@@ -115,7 +141,6 @@ export default function CustomerDetails() {
         ))}
       </div>
 
-      {/* Vehicles Tab */}
       {activeTab === "vehicles" && (
         <div style={styles.card}>
           {vehicles.length === 0 ? (
@@ -137,7 +162,6 @@ export default function CustomerDetails() {
         </div>
       )}
 
-      {/* Invoices Tab */}
       {activeTab === "invoices" && (
         <div style={styles.card}>
           {invoices.length === 0 ? (
@@ -151,7 +175,7 @@ export default function CustomerDetails() {
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                   <span style={i.status === "Paid" ? styles.badgeGreen : styles.badgeAmber}>{i.status}</span>
-                  <span style={styles.itemTitle}>${i.totalAmount.toLocaleString()}</span>
+                  <span style={styles.itemTitle}>${i.totalAmount?.toLocaleString()}</span>
                 </div>
               </div>
             ))
@@ -159,7 +183,6 @@ export default function CustomerDetails() {
         </div>
       )}
 
-      {/* Add Vehicle Tab */}
       {activeTab === "add" && (
         <div style={styles.card}>
           <p style={styles.sectionTitle}>Add vehicle</p>
@@ -172,7 +195,6 @@ export default function CustomerDetails() {
         </div>
       )}
 
-      {/* Edit Modal */}
       {editMode && (
         <div style={styles.card}>
           <p style={styles.sectionTitle}>Edit customer</p>
@@ -186,34 +208,7 @@ export default function CustomerDetails() {
           </div>
         </div>
       )}
+
     </div>
   );
-}
-
-const styles = {
-  wrapper: { padding: "1rem 0", fontFamily: "sans-serif" },
-  header: { display: "flex", gap: 12, alignItems: "center", marginBottom: "1.5rem" },
-  avatar: { width: 48, height: 48, borderRadius: "50%", background: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 500, fontSize: 15, color: "#0C447C", flexShrink: 0 },
-  custName: { margin: 0, fontSize: 18, fontWeight: 500 },
-  custPhone: { margin: "2px 0 0", fontSize: 13, color: "#888" },
-  statsGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: "1.5rem" },
-  statCard: { background: "#f5f5f5", borderRadius: 8, padding: "12px 16px", textAlign: "center" },
-  statLabel: { fontSize: 12, color: "#888", margin: "0 0 4px" },
-  statValue: { fontSize: 22, fontWeight: 500, margin: 0 },
-  tabs: { display: "flex", gap: 8, marginBottom: "1.25rem" },
-  tabBtn: { padding: "6px 16px", fontSize: 14, border: "0.5px solid #ccc", background: "transparent", borderRadius: 8, cursor: "pointer", color: "#555" },
-  tabActive: { background: "#E6F1FB", color: "#0C447C", borderColor: "transparent" },
-  card: { background: "#fff", border: "0.5px solid #e0e0e0", borderRadius: 12, padding: "1rem 1.25rem", marginBottom: "1rem" },
-  itemRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "0.5px solid #eee" },
-  itemTitle: { fontWeight: 500, fontSize: 14 },
-  itemSub: { color: "#888", fontSize: 13 },
-  sectionTitle: { fontSize: 13, fontWeight: 500, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 10px" },
-  input: { fontSize: 14, padding: "7px 12px", border: "0.5px solid #ccc", borderRadius: 8, width: "100%", boxSizing: "border-box" },
-  primaryBtn: { background: "#E6F1FB", color: "#0C447C", border: "none", padding: "8px 20px", borderRadius: 8, fontSize: 14, cursor: "pointer", fontWeight: 500 },
-  dangerBtn: { background: "#FCEBEB", color: "#A32D2D", border: "none", padding: "6px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer" },
-  badgeBlue: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#E6F1FB", color: "#0C447C" },
-  badgeGreen: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#EAF3DE", color: "#27500A" },
-  badgeAmber: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#FAEEDA", color: "#633806" },
-  empty: { color: "#888", fontSize: 14, textAlign: "center", padding: "1.5rem 0" },
-};
 }
