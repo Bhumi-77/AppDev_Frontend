@@ -1,129 +1,48 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import axios from './api/axios.js'
 import './App.css'
-import SearchCustomer from "./pages/staff/SearchCustomer";
-import CustomerDetails from "./pages/staff/CustomerDetails";
-
+import SearchCustomer from "./pages/staff/SearchCustomer"
+import CustomerDetails from "./pages/staff/CustomerDetails"
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-    <div>
-      <SearchCustomer />
-      <CustomerDetails id={1} />
-    </div>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <BrowserRouter>
+      <div style={styles.wrapper}>
 
-      <div className="ticks"></div>
+        <nav style={styles.nav}>
+          <span style={styles.navBrand}>Vehicle System</span>
+          <div style={styles.navLinks}>
+            <Link to="/" style={styles.navLink}>Search</Link>
+            <Link to="/customers/1" style={styles.navLink}>Customer Details</Link>
+          </div>
+        </nav>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div style={styles.content}>
+          <Routes>
+            <Route path="/" element={<SearchCustomer />} />
+            <Route path="/customers/:id" element={<CustomerDetailsWrapper />} />
+            <Route path="/customers/:id" element={<CustomerDetails />} />
+          </Routes>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      </div>
+    </BrowserRouter>
   )
 }
+
+function CustomerDetailsWrapper() {
+  const id = window.location.pathname.split("/").pop();
+  return <CustomerDetails id={id} />;
+}
+
+const styles = {
+  wrapper: { fontFamily: "sans-serif", minHeight: "100vh", background: "#fafafa" },
+  nav: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px", background: "#fff", borderBottom: "0.5px solid #e0e0e0" },
+  navBrand: { fontWeight: 500, fontSize: 16, color: "#0C447C" },
+  navLinks: { display: "flex", gap: 16 },
+  navLink: { fontSize: 14, color: "#555", textDecoration: "none" },
+  content: { maxWidth: 720, margin: "0 auto", padding: "24px 16px" },
+};
 
 export default App
