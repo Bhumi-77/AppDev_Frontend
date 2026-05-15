@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import {
@@ -17,6 +17,7 @@ import {
   Search,
   Menu,
   ChevronDown,
+  LogOut,
   CalendarDays,
   CalendarRange,
   CalendarClock,
@@ -67,6 +68,7 @@ const navigationItems = sidebarSections.flatMap((section) => section.items ?? []
 export default function AdminLayout() {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadNotifications();
@@ -79,6 +81,19 @@ export default function AdminLayout() {
     } catch {
       setNotifications([]);
     }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("admin_token");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("parking_token");
+    sessionStorage.removeItem("role");
+    sessionStorage.removeItem("user_id");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("admin");
+    sessionStorage.removeItem("parking_admin");
+    sessionStorage.removeItem("parking_admin_id");
+    navigate("/login");
   };
 
   return (
@@ -128,22 +143,16 @@ export default function AdminLayout() {
           </div>
         </nav>
 
-        {/* Bottom Profile */}
+        {/* Bottom Logout */}
         <div className="p-4 shrink-0">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-[#071B33] font-bold">
-              A
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">Admin User</p>
-              <p className="text-xs text-slate-300 truncate">
-                System Administrator
-              </p>
-            </div>
-
-            <ChevronDown size={17} className="text-slate-300" />
-          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mx-auto flex w-full max-w-[12rem] items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-black/20 transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-teal-300"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
         </div>
       </aside>
 

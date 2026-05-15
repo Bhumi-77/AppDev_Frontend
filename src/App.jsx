@@ -6,11 +6,18 @@ import StaffManagement from "./pages/Admin/ManageStaff";
 import FinancialReports from "./pages/Admin/FinancialReports";
 import LowStockAlerts from "./pages/Admin/LowStockAlerts";
 import Notifications from "./pages/Admin/Notifications";
+import CustomerSignup from "./pages/customer/CustomerSignup";
+import CustomerProfile from "./pages/customer/CustomerProfile";
+import CustomerLogin from "./pages/customer/CustomerLogin";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<CustomerLogin />} />
+        <Route path="/signup" element={<CustomerSignup />} />
+        <Route path="/profile" element={<CustomerProfile />} />
+
         <Route path="/" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="staff-management" element={<StaffManagement />} />
