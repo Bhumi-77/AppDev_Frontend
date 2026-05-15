@@ -1,41 +1,25 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import PendingCreditReminders from "./pages/Admin/PendingCreditReminders";
+import AdminLayout from "./layouts/AdminLayout";
 
-import SearchCustomer from "./pages/staff/SearchCustomer";
-import CustomerDetails from "./pages/staff/CustomerDetails";
-import FinancialReports from "./pages/admin/FinancialReports";
-import ManageStaff from "./pages/admin/ManageStaff";
+import Dashboard from "./pages/Admin/AdminDashboard";
+import StaffManagement from "./pages/Admin/ManageStaff";
+import FinancialReports from "./pages/Admin/FinancialReports";
+import LowStockAlerts from "./pages/Admin/LowStockAlerts";
+import Notifications from "./pages/Admin/Notifications";
 
 function App() {
   return (
     <BrowserRouter>
-      <nav className="navbar">
-        <h2>Vehicle System</h2>
-
-        <div>
-          <Link to="/">Home</Link>
-          <Link to="/admin/reports">Financial Reports</Link>
-          <Link to="/admin/staff">Manage Staff</Link>
-          <Link to="/staff/search-customer">Search Customer</Link>
-          <Link to="/staff/customer-details">Customer Details</Link>
-        </div>
-      </nav>
-
       <Routes>
-        <Route
-          path="/"
-          element={
-            <div className="page">
-              <h1>Vehicle Parts Selling and Inventory Management System</h1>
-              <p>Welcome to the dashboard.</p>
-            </div>
-          }
-        />
-
-        <Route path="/admin/reports" element={<FinancialReports />} />
-        <Route path="/admin/staff" element={<ManageStaff />} />
-        <Route path="/staff/search-customer" element={<SearchCustomer />} />
-        <Route path="/staff/customer-details" element={<CustomerDetails id={1} />} />
+        <Route path="/" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="staff-management" element={<StaffManagement />} />
+          <Route path="financial-reports" element={<FinancialReports />} />
+          <Route path="low-stock-alerts" element={<LowStockAlerts />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="pending-credit-reminders" element={<PendingCreditReminders />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
