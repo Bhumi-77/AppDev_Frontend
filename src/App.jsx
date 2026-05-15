@@ -1,48 +1,45 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import axios from './api/axios.js'
-import './App.css'
-import SearchCustomer from "./pages/staff/SearchCustomer"
-import CustomerDetails from "./pages/staff/CustomerDetails"
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import "./App.css";
+
+import SearchCustomer from "./pages/staff/SearchCustomer";
+import CustomerDetails from "./pages/staff/CustomerDetails";
+import FinancialReports from "./pages/Admin/FinancialReports";
+import ManageStaff from "./pages/Admin/ManageStaff";
 
 function App() {
   return (
     <BrowserRouter>
-      <div style={styles.wrapper}>
+      <nav className="navbar">
+        <h2>Vehicle System</h2>
 
-        <nav style={styles.nav}>
-          <span style={styles.navBrand}>Vehicle System</span>
-          <div style={styles.navLinks}>
-            <Link to="/" style={styles.navLink}>Search</Link>
-            <Link to="/customers/1" style={styles.navLink}>Customer Details</Link>
-          </div>
-        </nav>
-
-        <div style={styles.content}>
-          <Routes>
-            <Route path="/" element={<SearchCustomer />} />
-            <Route path="/customers/:id" element={<CustomerDetailsWrapper />} />
-            <Route path="/customers/:id" element={<CustomerDetails />} />
-          </Routes>
+        <div>
+          <Link to="/">Home</Link>
+          <Link to="/admin/reports">Financial Reports</Link>
+          <Link to="/admin/staff">Manage Staff</Link>
+          <Link to="/staff/search-customer">Search Customer</Link>
+          <Link to="/staff/customer-details">Customer Details</Link>
         </div>
+      </nav>
 
-      </div>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div className="page">
+              <h1>Vehicle Parts Selling and Inventory Management System</h1>
+              <p>Welcome to the dashboard.</p>
+            </div>
+          }
+        />
+
+        <Route path="/admin/reports" element={<FinancialReports />} />
+        <Route path="/admin/staff" element={<ManageStaff />} />
+        <Route path="/staff/search-customer" element={<SearchCustomer />} />
+        <Route path="/staff/customer-details" element={<CustomerDetails id={1} />} />
+      </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-function CustomerDetailsWrapper() {
-  const id = window.location.pathname.split("/").pop();
-  return <CustomerDetails id={id} />;
-}
+export default App;
 
-const styles = {
-  wrapper: { fontFamily: "sans-serif", minHeight: "100vh", background: "#fafafa" },
-  nav: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px", background: "#fff", borderBottom: "0.5px solid #e0e0e0" },
-  navBrand: { fontWeight: 500, fontSize: 16, color: "#0C447C" },
-  navLinks: { display: "flex", gap: 16 },
-  navLink: { fontSize: 14, color: "#555", textDecoration: "none" },
-  content: { maxWidth: 720, margin: "0 auto", padding: "24px 16px" },
-};
-
-export default App
