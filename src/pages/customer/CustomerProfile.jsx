@@ -1,40 +1,47 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
+import { getCustomerId, saveCustomer } from "../../api/auth";
 
+// Feature 12: Customers can manage their profile & vehicle details
 export default function CustomerProfile() {
+  const customerId = getCustomerId();
+  const navigate = useNavigate();
+
   const [customer, setCustomer] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [newPlate, setNewPlate] = useState("");
-  const [newMake, setNewMake] = useState("");
-  const [newYear, setNewYear] = useState("");
+  const [newVehicle, setNewVehicle] = useState({ vehicleNumber: "", make: "", year: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [msgType, setMsgType] = useState("success");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-
-  const userId = sessionStorage.getItem("user_id");
-  const profilePath = userId ? `/customers/${userId}` : "/user/profile";
 
   useEffect(() => {
+    if (!customerId) {
+      navigate("/login", { replace: true });
+      return;
+    }
     loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const flash = (type, text) => {
+    setMsgType(type);
+    setMessage(text);
+  };
 
   const loadProfile = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(profilePath);
-      const data = response.data;
+      const { data } = await axios.get(`/customers/${customerId}`);
       setCustomer(data);
       setVehicles(data.vehicles || []);
       setName(data.name || "");
       setPhone(data.phone || "");
-    } catch (err) {
-      setError("Unable to load your profile. Please login or register first.");
+    } catch {
+      flash("error", "Unable to load your profile. Please login again.");
     } finally {
       setLoading(false);
     }
@@ -44,208 +51,218 @@ export default function CustomerProfile() {
     setSaving(true);
     setMessage("");
     try {
-      await axios.put(profilePath, { name: name.trim(), phone: phone.trim() });
-      setCustomer((prev) => ({ ...prev, name: name.trim(), phone: phone.trim() }));
-      setMessage("Profile updated successfully.");
-      setMsgType("success");
-      sessionStorage.setItem("user", JSON.stringify({ ...customer, name: name.trim(), phone: phone.trim() }));
+      await axios.put(`/customers/${customerId}`, { name: name.trim(), phone: phone.trim() });
+      const updated = { ...customer, name: name.trim(), phone: phone.trim() };
+      setCustomer(updated);
+      saveCustomer(updated);
+      flash("success", "Profile updated successfully.");
     } catch {
-      setMsgType("error");
-      setMessage("Failed to update profile. Please try again.");
+      flash("error", "Failed to update profile. Please try again.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleAddVehicle = async () => {
-    if (!newPlate.trim() || !newMake.trim()) {
-      setMsgType("error");
-      setMessage("Please enter vehicle plate and make.");
+    if (!newVehicle.vehicleNumber.trim()) {
+      flash("error", "Please enter a vehicle plate number.");
       return;
     }
-
     try {
-      const endpoint = userId ? `/customers/${userId}/vehicles` : "/user/profile/vehicles";
-      const response = await axios.post(endpoint, {
-        vehicleNumber: newPlate.trim(),
-        make: newMake.trim(),
-        year: Number(newYear) || new Date().getFullYear(),
+      const { data } = await axios.post("/customeractions/add-vehicle", {
+        vehicleNumber: newVehicle.vehicleNumber.trim(),
+        make: newVehicle.make.trim(),
+        year: Number(newVehicle.year) || 0,
+        customerId,
       });
-
-      setVehicles((prev) => [...prev, response.data]);
-      setMessage("Vehicle added successfully.");
-      setMsgType("success");
-      setNewPlate("");
-      setNewMake("");
-      setNewYear("");
+      setVehicles((prev) => [...prev, data]);
+      setNewVehicle({ vehicleNumber: "", make: "", year: "" });
+      flash("success", "Vehicle added successfully.");
     } catch {
-      setMsgType("error");
-      setMessage("Unable to add vehicle. Please try again.");
+      flash("error", "Unable to add vehicle. Please try again.");
     }
   };
 
-  const handleRemoveVehicle = async (vehicleId) => {
+  const handleUpdateVehicle = async (vehicle) => {
     try {
-      await axios.delete(`/vehicles/${vehicleId}`);
-      setVehicles((prev) => prev.filter((vehicle) => vehicle.id !== vehicleId));
-      setMessage("Vehicle removed.");
-      setMsgType("success");
+      await axios.put(`/customeractions/update-vehicle/${vehicle.id}`, {
+        vehicleNumber: vehicle.vehicleNumber,
+        make: vehicle.make,
+        year: Number(vehicle.year) || 0,
+      });
+      flash("success", "Vehicle updated.");
     } catch {
-      setMsgType("error");
-      setMessage("Failed to remove vehicle.");
+      flash("error", "Failed to update vehicle.");
     }
   };
+
+  const handleRemoveVehicle = async (id) => {
+    try {
+      await axios.delete(`/customeractions/delete-vehicle/${id}`);
+      setVehicles((prev) => prev.filter((v) => v.id !== id));
+      flash("success", "Vehicle removed.");
+    } catch {
+      flash("error", "Failed to remove vehicle.");
+    }
+  };
+
+  const editVehicleField = (id, field, value) => {
+    setVehicles((prev) => prev.map((v) => (v.id === id ? { ...v, [field]: value } : v)));
+  };
+
+  const inputClass =
+    "rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-100 px-4 py-10">
-        <div className="mx-auto max-w-4xl rounded-[28px] bg-white p-10 shadow-2xl shadow-slate-200">
-          <p className="text-center text-slate-500">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-slate-100 px-4 py-10">
-        <div className="mx-auto max-w-4xl rounded-[28px] bg-white p-10 shadow-2xl shadow-slate-200">
-          <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-800">{error}</div>
-          <button
-            className="mt-6 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
-            onClick={() => navigate("/signup")}
-          >
-            Register as customer
-          </button>
-        </div>
-      </div>
-    );
+    return <p className="text-center text-slate-500">Loading profile...</p>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-10">
-      <div className="mx-auto max-w-4xl rounded-[28px] bg-white p-10 shadow-2xl shadow-slate-200">
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold text-slate-900">Customer Profile</h1>
-            <p className="mt-2 text-sm text-slate-500">Manage your profile details and record vehicle information for better service.</p>
+    <div className="mx-auto max-w-4xl">
+      <h1 className="text-3xl font-semibold text-slate-900">My Profile</h1>
+      <p className="mt-2 text-sm text-slate-500">
+        Manage your profile details and registered vehicles.
+      </p>
+
+      {message && (
+        <div
+          className={`mt-6 rounded-3xl px-5 py-4 text-sm ${
+            msgType === "success"
+              ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
+              : "border border-rose-200 bg-rose-50 text-rose-800"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+
+      {/* Profile details */}
+      <section className="mt-8 rounded-[28px] bg-white p-8 shadow-xl shadow-slate-200">
+        <h2 className="text-lg font-semibold text-slate-900">Profile details</h2>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-slate-700">Full name</label>
+            <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-slate-700">Phone number</label>
+            <input className={inputClass} value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </div>
+          <div className="grid gap-2 md:col-span-2">
+            <label className="text-sm font-medium text-slate-700">Email (cannot be changed)</label>
+            <input className={`${inputClass} opacity-60`} value={customer?.email || ""} disabled />
           </div>
         </div>
+        <button
+          className={`mt-5 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition ${
+            saving ? "bg-indigo-300 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+          }`}
+          disabled={saving}
+          onClick={handleProfileSave}
+        >
+          {saving ? "Saving..." : "Save profile"}
+        </button>
+      </section>
 
-        {message && (
-          <div className={`rounded-3xl px-5 py-4 text-sm ${msgType === "success" ? "border border-emerald-200 bg-emerald-50 text-emerald-800" : "border border-rose-200 bg-rose-50 text-rose-800"}`}>
-            {message}
-          </div>
-        )}
-
-        <section className="mb-10">
-          <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Profile details</h2>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">Full name</label>
-              <input
-                className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">Phone number</label>
-              <input
-                className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <button
-              className={`rounded-2xl px-5 py-3 text-sm font-semibold text-white transition ${saving ? "bg-indigo-300 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
-              disabled={saving}
-              onClick={handleProfileSave}
-            >
-              {saving ? "Saving..." : "Save profile"}
-            </button>
-          </div>
-        </section>
-
-        <section className="mb-10">
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">Your registered vehicles</h2>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-slate-50">
-            {vehicles.length === 0 ? (
-              <p className="p-6 text-center text-sm text-slate-500">No vehicles registered yet. Add one below.</p>
-            ) : (
-              vehicles.map((vehicle) => (
-                <div key={vehicle.id} className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{vehicle.vehicleNumber}</p>
-                    <p className="text-sm text-slate-500">{vehicle.make} · {vehicle.year}</p>
-                  </div>
+      {/* Registered vehicles */}
+      <section className="mt-8 rounded-[28px] bg-white p-8 shadow-xl shadow-slate-200">
+        <h2 className="text-lg font-semibold text-slate-900">Registered vehicles</h2>
+        <div className="mt-5 space-y-4">
+          {vehicles.length === 0 ? (
+            <p className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
+              No vehicles registered yet. Add one below.
+            </p>
+          ) : (
+            vehicles.map((vehicle) => (
+              <div
+                key={vehicle.id}
+                className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_1fr_120px_auto] md:items-end"
+              >
+                <div className="grid gap-1">
+                  <label className="text-xs font-medium text-slate-500">Plate number</label>
+                  <input
+                    className={inputClass}
+                    value={vehicle.vehicleNumber || ""}
+                    onChange={(e) => editVehicleField(vehicle.id, "vehicleNumber", e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <label className="text-xs font-medium text-slate-500">Make &amp; model</label>
+                  <input
+                    className={inputClass}
+                    value={vehicle.make || ""}
+                    onChange={(e) => editVehicleField(vehicle.id, "make", e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <label className="text-xs font-medium text-slate-500">Year</label>
+                  <input
+                    type="number"
+                    className={inputClass}
+                    value={vehicle.year || ""}
+                    onChange={(e) => editVehicleField(vehicle.id, "year", e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
                   <button
-                    className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+                    className="rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                    onClick={() => handleUpdateVehicle(vehicle)}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="rounded-2xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-300"
                     onClick={() => handleRemoveVehicle(vehicle.id)}
                   >
                     Remove
                   </button>
                 </div>
-              ))
-            )}
-          </div>
-        </section>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
 
-        <section>
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">Add a new vehicle</h2>
+      {/* Add vehicle */}
+      <section className="mt-8 rounded-[28px] bg-white p-8 shadow-xl shadow-slate-200">
+        <h2 className="text-lg font-semibold text-slate-900">Add a new vehicle</h2>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-slate-700">Plate number</label>
+            <input
+              className={inputClass}
+              value={newVehicle.vehicleNumber}
+              onChange={(e) => setNewVehicle((p) => ({ ...p, vehicleNumber: e.target.value }))}
+              placeholder="BA-1-1234"
+            />
           </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">Plate number</label>
-              <input
-                className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                value={newPlate}
-                onChange={(e) => setNewPlate(e.target.value)}
-                placeholder="ABC-1234"
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">Make & model</label>
-              <input
-                className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                value={newMake}
-                onChange={(e) => setNewMake(e.target.value)}
-                placeholder="Toyota Corolla"
-              />
-            </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-slate-700">Make &amp; model</label>
+            <input
+              className={inputClass}
+              value={newVehicle.make}
+              onChange={(e) => setNewVehicle((p) => ({ ...p, make: e.target.value }))}
+              placeholder="Toyota Corolla"
+            />
           </div>
-
-          <div className="mt-4 grid gap-2 md:grid-cols-2">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium text-slate-700">Year</label>
-              <input
-                className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                value={newYear}
-                onChange={(e) => setNewYear(e.target.value)}
-                placeholder="2024"
-              />
-            </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-slate-700">Year</label>
+            <input
+              type="number"
+              className={inputClass}
+              value={newVehicle.year}
+              onChange={(e) => setNewVehicle((p) => ({ ...p, year: e.target.value }))}
+              placeholder="2024"
+            />
           </div>
-
-          <button
-            className="mt-5 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
-            onClick={handleAddVehicle}
-          >
-            Add vehicle
-          </button>
-        </section>
-      </div>
+        </div>
+        <button
+          className="mt-5 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+          onClick={handleAddVehicle}
+        >
+          Add vehicle
+        </button>
+      </section>
     </div>
   );
 }
