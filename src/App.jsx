@@ -1,48 +1,47 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import axios from './api/axios.js'
-import './App.css'
-import SearchCustomer from "./pages/staff/SearchCustomer"
-import CustomerDetails from "./pages/staff/CustomerDetails"
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import PendingCreditReminders from "./pages/Admin/PendingCreditReminders";
+import AdminLayout from "./layouts/AdminLayout";
+import Dashboard from "./pages/Admin/AdminDashboard";
+import StaffManagement from "./pages/Admin/ManageStaff";
+import FinancialReports from "./pages/Admin/FinancialReports";
+import LowStockAlerts from "./pages/Admin/LowStockAlerts";
+import Notifications from "./pages/Admin/Notifications";
+import CustomerLayout from "./layouts/CustomerLayout";
+import CustomerSignup from "./pages/customer/CustomerSignup";
+import CustomerLogin from "./pages/customer/CustomerLogin";
+import CustomerProfile from "./pages/customer/CustomerProfile";
+import CustomerServices from "./pages/customer/CustomerServices";
+import CustomerHistory from "./pages/customer/CustomerHistory";
+import CustomerPurchase from "./pages/customer/CustomerPurchase";
 
 function App() {
   return (
     <BrowserRouter>
-      <div style={styles.wrapper}>
+      <Routes>
+        {/* Customer auth (Feature 12) */}
+        <Route path="/login" element={<CustomerLogin />} />
+        <Route path="/signup" element={<CustomerSignup />} />
 
-        <nav style={styles.nav}>
-          <span style={styles.navBrand}>Vehicle System</span>
-          <div style={styles.navLinks}>
-            <Link to="/" style={styles.navLink}>Search</Link>
-            <Link to="/customers/1" style={styles.navLink}>Customer Details</Link>
-          </div>
-        </nav>
+        {/* Customer portal (Features 12, 13, 14, 16) */}
+        <Route element={<CustomerLayout />}>
+          <Route path="/profile" element={<CustomerProfile />} />
+          <Route path="/services" element={<CustomerServices />} />
+          <Route path="/purchase" element={<CustomerPurchase />} />
+          <Route path="/history" element={<CustomerHistory />} />
+        </Route>
 
-        <div style={styles.content}>
-          <Routes>
-            <Route path="/" element={<SearchCustomer />} />
-            <Route path="/customers/:id" element={<CustomerDetailsWrapper />} />
-            <Route path="/customers/:id" element={<CustomerDetails />} />
-          </Routes>
-        </div>
-
-      </div>
+        {/* Admin portal */}
+        <Route path="/" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="staff-management" element={<StaffManagement />} />
+          <Route path="financial-reports" element={<FinancialReports />} />
+          <Route path="low-stock-alerts" element={<LowStockAlerts />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="pending-credit-reminders" element={<PendingCreditReminders />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-function CustomerDetailsWrapper() {
-  const id = window.location.pathname.split("/").pop();
-  return <CustomerDetails id={id} />;
-}
-
-const styles = {
-  wrapper: { fontFamily: "sans-serif", minHeight: "100vh", background: "#fafafa" },
-  nav: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px", background: "#fff", borderBottom: "0.5px solid #e0e0e0" },
-  navBrand: { fontWeight: 500, fontSize: 16, color: "#0C447C" },
-  navLinks: { display: "flex", gap: 16 },
-  navLink: { fontSize: 14, color: "#555", textDecoration: "none" },
-  content: { maxWidth: 720, margin: "0 auto", padding: "24px 16px" },
-};
-
-export default App
+export default App;
