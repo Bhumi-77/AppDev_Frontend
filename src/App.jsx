@@ -1,11 +1,22 @@
-import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom'
-import './App.css'
-import SearchCustomer from "./pages/staff/SearchCustomer"
-import CustomerDetails from "./pages/staff/CustomerDetails"
-import SellParts from "./pages/staff/SellParts.jsx"
-import InvoicePage from "./pages/staff/InvoicePage"
-import StaffDashboard from "./pages/staff/StaffDashboard"
-import AddPart from "./pages/staff/Addparts.jsx"
+import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
+import './App.css';
+
+// Staff Pages
+import SearchCustomer from "./pages/staff/SearchCustomer";
+import CustomerDetails from "./pages/staff/CustomerDetails";
+import SellParts from "./pages/staff/SellParts.jsx";
+import InvoicePage from "./pages/staff/InvoicePage";
+import StaffDashboard from "./pages/staff/StaffDashboard";
+import AddPart from "./pages/staff/Addparts.jsx";
+
+// Admin Pages (Nabin)
+import AdminLayout from "./layouts/AdminLayout";
+import Dashboard from "./pages/Admin/AdminDashboard";
+import StaffManagement from "./pages/Admin/ManageStaff";
+import FinancialReports from "./pages/Admin/FinancialReports";
+import LowStockAlerts from "./pages/Admin/LowStockAlerts";
+import Notifications from "./pages/Admin/Notifications";
+import PendingCreditReminders from "./pages/Admin/PendingCreditReminders";
 
 const NAV_ITEMS = [
   { to: "/dashboard",  label: "Dashboard",       icon: "⊞" },
@@ -83,13 +94,15 @@ function AppLayout() {
         <TopBar />
         <div style={styles.content}>
           <Routes>
+            {/* Staff Routes */}
             <Route path="/"              element={<SearchCustomer />} />
+            {/* If staff-dashboard is accessed via /dashboard */}
+            <Route path="/dashboard"     element={<StaffDashboard />} />
             <Route path="/customers/:id" element={<CustomerDetails />} />
             <Route path="/sell-parts"    element={<SellParts />} />
             <Route path="/add-part"      element={<AddPart />} />
             <Route path="/invoice"       element={<InvoicePage />} />
             <Route path="/invoice/:id"   element={<InvoicePage />} />
-            <Route path="/dashboard"     element={<StaffDashboard />} />
           </Routes>
         </div>
       </div>
@@ -100,7 +113,20 @@ function AppLayout() {
 function App() {
   return (
     <BrowserRouter>
-      <AppLayout />
+      <Routes>
+        {/* Admin Router Structure */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="staff-management" element={<StaffManagement />} />
+          <Route path="financial-reports" element={<FinancialReports />} />
+          <Route path="low-stock-alerts" element={<LowStockAlerts />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="pending-credit-reminders" element={<PendingCreditReminders />} />
+        </Route>
+
+        {/* Staff Layout Fallback Structure */}
+        <Route path="/*" element={<AppLayout />} />
+      </Routes>
     </BrowserRouter>
   );
 }
@@ -204,4 +230,4 @@ const styles = {
   content: { padding: "28px 32px", flex: 1 },
 };
 
-export default App
+export default App;
