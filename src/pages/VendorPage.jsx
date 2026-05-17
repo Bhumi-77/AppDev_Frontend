@@ -5,6 +5,8 @@ import {
   updateVendor,
   deleteVendor,
 } from "../api/vendorApi";
+// SideBar Layout
+import AdminLayout from "../components/AdminLayout"; 
 
 export default function VendorPage() {
   const [vendors, setVendors] = useState([]);
@@ -20,6 +22,7 @@ export default function VendorPage() {
     address: "",
   });
 
+  // Load all vendors on page load
   useEffect(() => {
     fetchVendors();
   }, []);
@@ -88,104 +91,96 @@ export default function VendorPage() {
   };
 
   return (
-    <div style={styles.pageBackground}>
-      <div style={styles.container}>
-        <div style={styles.header}>
+    <AdminLayout>
+      <div style={styles.contentPadding}>
+        <div style={styles.pageHeader}>
           <div>
             <h1 style={styles.title}>Vendor Management</h1>
-            <p style={styles.subtitle}>Manage your vehicle parts suppliers and contacts</p>
+            <p style={styles.subtitle}>Add new vendors, update supplier details, and manage records.</p>
           </div>
-          <button
-            style={styles.addBtn}
-            onClick={() => { resetForm(); setShowForm(true); }}
-          >
-            + Add New Vendor
-          </button>
         </div>
 
+        {/* Error message */}
         {error && <div style={styles.errorBox}>{error}</div>}
 
-        {showForm && (
-          <div style={styles.formCard}>
-            <div style={styles.formHeader}>
-              <h2 style={styles.formTitle}>
-                {editingVendor ? "Edit Vendor Details" : "Register New Vendor"}
-              </h2>
-            </div>
-            <form onSubmit={handleSubmit} style={styles.formPadding}>
-              <div style={styles.formGrid}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Vendor Name</label>
-                  <input
-                    style={styles.input}
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="AutoParts Nepal"
-                    required
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Primary Contact</label>
-                  <input
-                    style={styles.input}
-                    name="contactPerson"
-                    value={formData.contactPerson}
-                    onChange={handleInputChange}
-                    placeholder="Contact person name"
-                    required
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Phone Number</label>
-                  <input
-                    style={styles.input}
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="+977-XXXXXXXXXX"
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Email Address</label>
-                  <input
-                    style={styles.input}
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="vendor@company.com"
-                  />
-                </div>
-                <div style={{ ...styles.formGroup, gridColumn: "1 / -1" }}>
-                  <label style={styles.label}>Business Address</label>
-                  <input
-                    style={styles.input}
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    placeholder="Full street address"
-                  />
-                </div>
+        {/* Form to add vendor */}
+        <div style={styles.card}>
+          <h3 style={styles.cardTitle}>
+            {editingVendor ? "Edit Vendor" : "Add Vendor"}
+          </h3>
+          <p style={styles.cardSubtitle}>Register/Update supplier</p>
+
+          <form onSubmit={handleSubmit}>
+            <div style={styles.formGrid}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Vendor Name *</label>
+                <input
+                  style={styles.input}
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Vendor name"
+                  required
+                />
               </div>
-              <div style={styles.formActions}>
-                <button type="submit" style={styles.saveBtn}>
-                  {editingVendor ? "Save Changes" : "Create Vendor"}
-                </button>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Email Address</label>
+                <input
+                  style={styles.input}
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="vendor@company.com"
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Contact Person *</label>
+                <input
+                  style={styles.input}
+                  name="contactPerson"
+                  value={formData.contactPerson}
+                  onChange={handleInputChange}
+                  placeholder="Person Name"
+                  required
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Phone Number</label>
+                <input
+                  style={styles.input}
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="98********"
+                />
+              </div>
+            </div>
+            <div style={styles.formActions}>
+              <button type="submit" style={styles.submitBtn}>
+                {editingVendor ? "Update Vendor" : "Add Vendor"}
+              </button>
+              {editingVendor && (
                 <button type="button" style={styles.cancelBtn} onClick={resetForm}>
                   Cancel
                 </button>
-              </div>
-            </form>
-          </div>
-        )}
+              )}
+            </div>
+          </form>
+        </div>
 
-        <div style={styles.tableCard}>
+        {/* Table */}
+        <div style={styles.card}>
+          <div style={styles.tableHeader}>
+            <h3 style={styles.cardTitle}>Vendor List</h3>
+            <span style={styles.badge}>{vendors.length} Vendors</span>
+          </div>
+
           {loading ? (
             <p style={styles.loadingText}>Synchronizing data...</p>
           ) : vendors.length === 0 ? (
             <div style={styles.emptyBox}>
-              <p>Your supplier list is empty.</p>
+              <p>No vendors found. Add your first vendor!</p>
             </div>
           ) : (
             <div style={styles.tableWrapper}>
@@ -194,40 +189,35 @@ export default function VendorPage() {
                   <tr style={styles.tableHead}>
                     <th style={styles.th}>ID</th>
                     <th style={styles.th}>Company Name</th>
+                    <th style={styles.th}>Email</th>
                     <th style={styles.th}>Contact Person</th>
-                    <th style={styles.th}>Contact Info</th>
-                    <th style={styles.th}>Address</th>
-                    <th style={styles.thAction}>Actions</th>
+                    <th style={styles.th}>Status</th>
+                    <th style={styles.th}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {vendors.map((vendor, index) => (
-                    <tr key={vendor.id} style={styles.tableRow}>
-                      <td style={styles.tdId}>#{vendor.id}</td>
-                      <td style={styles.tdName}>{vendor.name}</td>
+                  {vendors.map((vendor) => (
+                    <tr key={vendor.id} style={styles.tr}>
+                      <td style={styles.td}>#{vendor.id}</td>
+                      <td style={styles.tdBold}>{vendor.name}</td>
+                      <td style={styles.td}>{vendor.email}</td>
                       <td style={styles.td}>{vendor.contactPerson}</td>
                       <td style={styles.td}>
-                        <div style={styles.contactCell}>
-                          <span style={styles.phoneText}>{vendor.phone}</span>
-                          <span style={styles.emailText}>{vendor.email}</span>
-                        </div>
+                        <span style={styles.statusActive}>Active</span>
                       </td>
-                      <td style={styles.td}>{vendor.address}</td>
                       <td style={styles.td}>
-                        <div style={styles.btnGroup}>
-                          <button
-                            style={styles.editBtn}
-                            onClick={() => handleEdit(vendor)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            style={styles.deleteBtn}
-                            onClick={() => handleDelete(vendor.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
+                        <button
+                          style={styles.editLink}
+                          onClick={() => handleEdit(vendor)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          style={styles.deleteLink}
+                          onClick={() => handleDelete(vendor.id)}
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -237,87 +227,51 @@ export default function VendorPage() {
           )}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
 
 const styles = {
-  pageBackground: {
-    backgroundColor: "#f8fafc",
-    minHeight: "100vh",
-    width: "100%",
+  contentPadding: {
+    padding: "10px",
   },
-  container: {
-    maxWidth: "1250px",
-    margin: "0 auto",
-    padding: "40px 20px",
-    fontFamily: "'Inter', 'Segoe UI', sans-serif",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginBottom: "32px",
+  pageHeader: {
+    marginBottom: "30px",
   },
   title: {
-    fontSize: "30px",
+    fontSize: "26px",
     fontWeight: "800",
-    color: "#0f172a",
+    color: "#111827",
     margin: 0,
-    letterSpacing: "-0.5px",
   },
   subtitle: {
-    color: "#64748b",
+    color: "#6b7280",
+    fontSize: "14px",
     marginTop: "4px",
-    fontSize: "15px",
   },
-  addBtn: {
-    backgroundColor: "#4f46e5",
-    color: "#ffffff",
-    border: "none",
-    padding: "12px 24px",
-    borderRadius: "10px",
-    fontSize: "14px",
-    cursor: "pointer",
-    fontWeight: "600",
-    boxShadow: "0 4px 6px -1px rgba(79, 70, 229, 0.2)",
-    transition: "transform 0.2s",
-  },
-  errorBox: {
-    backgroundColor: "#fef2f2",
-    color: "#b91c1c",
-    padding: "16px",
-    borderRadius: "12px",
-    border: "1px solid #fecaca",
-    marginBottom: "20px",
-    fontSize: "14px",
-  },
-  formCard: {
+  card: {
     backgroundColor: "#ffffff",
-    borderRadius: "16px",
-    marginBottom: "32px",
-    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-    border: "1px solid #e2e8f0",
-    overflow: "hidden",
+    borderRadius: "12px",
+    padding: "30px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+    marginBottom: "30px",
+    border: "1px solid #e5e7eb",
   },
-  formHeader: {
-    padding: "20px 24px",
-    borderBottom: "1px solid #f1f5f9",
-    backgroundColor: "#fcfcfd",
-  },
-  formTitle: {
-    fontSize: "16px",
+  cardTitle: {
+    fontSize: "18px",
     fontWeight: "700",
-    color: "#334155",
-    margin: 0,
+    color: "#111827",
+    margin: "0 0 4px 0",
   },
-  formPadding: {
-    padding: "24px",
+  cardSubtitle: {
+    fontSize: "13px",
+    color: "#6b7280",
+    margin: "0 0 20px 0",
   },
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: "20px",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "15px",
   },
   formGroup: {
     display: "flex",
@@ -333,47 +287,49 @@ const styles = {
   },
   input: {
     padding: "12px 16px",
-    border: "1px solid #e2e8f0",
     borderRadius: "8px",
+    border: "1px solid #d1d5db",
     fontSize: "14px",
+    backgroundColor: "#f9fafb",
     outline: "none",
-    color: "#1e293b",
-    backgroundColor: "#f8fafc",
-    transition: "border-color 0.2s",
   },
   formActions: {
+    marginTop: "20px",
     display: "flex",
-    gap: "12px",
-    marginTop: "28px",
-    paddingTop: "20px",
-    borderTop: "1px solid #f1f5f9",
+    gap: "10px",
   },
-  saveBtn: {
-    backgroundColor: "#10b981",
+  submitBtn: {
+    backgroundColor: "#14b8a6",
     color: "#fff",
     border: "none",
-    padding: "12px 28px",
+    padding: "10px 24px",
     borderRadius: "8px",
-    fontSize: "14px",
+    fontWeight: "700",
     cursor: "pointer",
-    fontWeight: "600",
   },
   cancelBtn: {
-    backgroundColor: "transparent",
-    color: "#64748b",
-    border: "1px solid #e2e8f0",
-    padding: "12px 28px",
+    backgroundColor: "#f3f4f6",
+    color: "#4b5563",
+    border: "1px solid #d1d5db",
+    padding: "10px 24px",
     borderRadius: "8px",
-    fontSize: "14px",
+    fontWeight: "700",
     cursor: "pointer",
-    fontWeight: "600",
   },
-  tableCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: "16px",
-    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
-    border: "1px solid #e2e8f0",
-    overflow: "hidden",
+  tableHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  },
+  badge: {
+    backgroundColor: "#f0fdfa",
+    color: "#0d9488",
+    padding: "4px 12px",
+    borderRadius: "20px",
+    fontSize: "12px",
+    fontWeight: "700",
+    border: "1px solid #ccfbf1",
   },
   tableWrapper: {
     overflowX: "auto",
@@ -381,94 +337,70 @@ const styles = {
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    textAlign: "left",
   },
   tableHead: {
-    backgroundColor: "#f8fafc",
-    borderBottom: "1px solid #e2e8f0",
+    borderBottom: "2px solid #f3f4f6",
   },
   th: {
-    padding: "16px 24px",
-    fontSize: "12px",
-    fontWeight: "700",
-    color: "#64748b",
-    textTransform: "uppercase",
-  },
-  thAction: {
-    padding: "16px 24px",
-    fontSize: "12px",
-    fontWeight: "700",
-    color: "#64748b",
-    textTransform: "uppercase",
-    textAlign: "right",
-  },
-  tableRow: {
-    borderBottom: "1px solid #f1f5f9",
-  },
-  tdId: {
-    padding: "20px 24px",
+    textAlign: "left",
+    padding: "12px 0",
     fontSize: "13px",
-    color: "#94a3b8",
-    fontWeight: "500",
+    fontWeight: "600",
+    color: "#6b7280",
   },
-  tdName: {
-    padding: "20px 24px",
-    fontSize: "15px",
-    color: "#0f172a",
-    fontWeight: "700",
+  tr: {
+    borderBottom: "1px solid #f3f4f6",
   },
   td: {
-    padding: "20px 24px",
+    padding: "16px 0",
     fontSize: "14px",
-    color: "#475569",
+    color: "#374151",
   },
-  contactCell: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "2px",
+  tdBold: {
+    padding: "16px 0",
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#111827",
   },
-  phoneText: {
-    fontWeight: "600",
-    color: "#334155",
-  },
-  emailText: {
+  statusActive: {
+    backgroundColor: "#d1fae5",
+    color: "#065f46",
+    padding: "4px 10px",
+    borderRadius: "12px",
     fontSize: "12px",
-    color: "#94a3b8",
+    fontWeight: "600",
   },
-  btnGroup: {
-    display: "flex",
-    gap: "8px",
-    justifyContent: "flex-end",
-  },
-  editBtn: {
-    backgroundColor: "#fffbeb",
-    color: "#d97706",
-    border: "1px solid #fde68a",
-    padding: "6px 16px",
-    borderRadius: "6px",
+  editLink: {
+    background: "none",
+    border: "none",
+    color: "#14b8a6",
+    fontWeight: "600",
     cursor: "pointer",
-    fontWeight: "600",
-    fontSize: "12px",
+    marginRight: "12px",
   },
-  deleteBtn: {
-    backgroundColor: "#fef2f2",
-    color: "#dc2626",
-    border: "1px solid #fecaca",
-    padding: "6px 16px",
-    borderRadius: "6px",
-    cursor: "pointer",
+  deleteLink: {
+    background: "none",
+    border: "none",
+    color: "#ef4444",
     fontWeight: "600",
-    fontSize: "12px",
+    cursor: "pointer",
+  },
+  errorBox: {
+    padding: "15px",
+    backgroundColor: "#fee2e2",
+    color: "#b91c1c",
+    borderRadius: "8px",
+    marginBottom: "20px",
   },
   loadingText: {
     textAlign: "center",
     color: "#64748b",
-    padding: "60px",
-    fontSize: "15px",
+    fontSize: "16px",
+    padding: "40px",
   },
   emptyBox: {
     textAlign: "center",
     color: "#94a3b8",
-    padding: "80px",
+    padding: "40px",
   },
 };
