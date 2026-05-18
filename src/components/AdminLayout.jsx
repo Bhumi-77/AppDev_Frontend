@@ -1,23 +1,28 @@
+import { useNavigate, useLocation } from "react-router-dom"; 
 import {
   LayoutDashboard, Users, Truck, Package, Layers, FileText, Receipt,
   BarChart3, AlertTriangle, Brain, Settings, Bell, Search, Menu, ChevronDown,
 } from "lucide-react";
 
 const sidebarItems = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Staff Management", icon: Users },
-  { label: "Vendor Management", icon: Truck },
-  { label: "Parts Management", icon: Package },
-  { label: "Stock Overview", icon: Layers },
-  { label: "Purchase Invoices", icon: FileText },
-  { label: "Sales Invoices", icon: Receipt },
-  { label: "Financial Reports", icon: BarChart3 },
-  { label: "Low Stock Alerts", icon: AlertTriangle },
-  { label: "AI Predictive Alerts", icon: Brain },
-  { label: "Settings", icon: Settings },
+  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { label: "Staff Management", path: "/staff", icon: Users },
+  { label: "Vendor Management", path: "/vendors", icon: Truck },
+  { label: "Parts Management", path: "/parts", icon: Package },
+  { label: "Stock Overview", path: "/stock", icon: Layers },
+  { label: "Purchase Invoices", path: "/invoices", icon: FileText },
+  { label: "Sales Invoices", path: "/sales", icon: Receipt },
+  { label: "Financial Reports", path: "/reports", icon: BarChart3 },
+  { label: "Low Stock Alerts", path: "/alerts", icon: AlertTriangle },
+  { label: "AI Predictive Alerts", path: "/ai", icon: Brain },
+  { label: "Settings", path: "/settings", icon: Settings },
 ];
 
+// Navigation 
 export default function AdminLayout({ children }) { 
+  const navigate = useNavigate(); 
+  const location = useLocation(); 
+
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
       {/* Sidebar */}
@@ -32,13 +37,19 @@ export default function AdminLayout({ children }) {
           </div>
         </div>
 
+        {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-2">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
             // Active Page
-            const isActive = item.label === "Vendor Management"; 
+            const isActive = location.pathname === item.path; 
+
             return (
-              <button key={item.label} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive ? "bg-teal-500 text-white shadow-lg shadow-teal-500/25" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}>
+              <button 
+                key={item.label} 
+                onClick={() => navigate(item.path)} // Logic to switch pages
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive ? "bg-teal-500 text-white shadow-lg shadow-teal-500/25" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+              >
                 <Icon size={20} />
                 <span>{item.label}</span>
               </button>
