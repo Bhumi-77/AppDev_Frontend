@@ -2,6 +2,54 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "../../api/axios";
 
+const styles = {
+  wrapper: { padding: "0.5rem 0 2rem", fontFamily: "sans-serif" },
+
+  // Header
+  pageHeader: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" },
+  title: { margin: 0, fontSize: 22, fontWeight: 500 },
+  subtitle: { margin: "4px 0 0", fontSize: 14, color: "#888" },
+
+  // Customer card
+  customerCard: { background: "#fff", border: "0.5px solid #e0e0e0", borderRadius: 12, padding: "1.25rem 1.5rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: 14 },
+  avatar: { width: 52, height: 52, borderRadius: "50%", background: "#0f1b2d", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 16, color: "#14b89a", flexShrink: 0 },
+  custName: { margin: 0, fontSize: 16, fontWeight: 500 },
+  custPhone: { margin: "3px 0 0", fontSize: 13, color: "#888" },
+  headerActions: { display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" },
+
+  // Stats
+  statsGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: "1.5rem" },
+  statCard: { background: "#fff", border: "0.5px solid #e0e0e0", borderRadius: 12, padding: "1rem 1.25rem", textAlign: "center" },
+  statLabel: { fontSize: 11, fontWeight: 500, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" },
+  statValue: { fontSize: 24, fontWeight: 500, margin: 0, color: "#0f1b2d" },
+
+  // Tabs
+  tabs: { display: "flex", gap: 6, marginBottom: "1.25rem" },
+  tabBtn: { padding: "7px 16px", fontSize: 14, border: "0.5px solid #ddd", background: "#fff", borderRadius: 8, cursor: "pointer", color: "#666", fontWeight: 400 },
+  tabActive: { background: "#14b89a", color: "#fff", borderColor: "transparent", fontWeight: 500 },
+
+  // Card + rows
+  card: { background: "#fff", border: "0.5px solid #e0e0e0", borderRadius: 12, padding: "1rem 1.25rem", marginBottom: "1rem" },
+  itemRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "0.5px solid #f0f0f0" },
+  itemTitle: { fontWeight: 500, fontSize: 14 },
+  itemSub: { color: "#888", fontSize: 13 },
+  sectionTitle: { fontSize: 11, fontWeight: 500, color: "#888", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 12px" },
+
+  // Inputs & buttons
+  input: { fontSize: 14, padding: "8px 12px", border: "0.5px solid #ddd", borderRadius: 8, width: "100%", boxSizing: "border-box", outline: "none" },
+  primaryBtn: { background: "#14b89a", color: "#fff", border: "none", padding: "8px 20px", borderRadius: 8, fontSize: 14, cursor: "pointer", fontWeight: 500 },
+  secondaryBtn: { background: "#fff", color: "#444", border: "0.5px solid #ddd", padding: "7px 16px", borderRadius: 8, fontSize: 14, cursor: "pointer" },
+  editBtn: { background: "#f5f5f5", color: "#333", border: "0.5px solid #ddd", padding: "6px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer" },
+  dangerBtn: { background: "#FCEBEB", color: "#A32D2D", border: "none", padding: "6px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer" },
+
+  // Badges
+  badgeBlue: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 10px", borderRadius: 99, background: "#E6F1FB", color: "#0C447C" },
+  badgeGreen: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 10px", borderRadius: 99, background: "#EAF3DE", color: "#27500A" },
+  badgeAmber: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 10px", borderRadius: 99, background: "#FAEEDA", color: "#633806" },
+  badgeTeal: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 10px", borderRadius: 99, background: "#d0f5ee", color: "#0a6b56" },
+
+  empty: { color: "#aaa", fontSize: 14, textAlign: "center", padding: "2rem 0" },
+};
 
 export default function CustomerDetails() {
   const { id } = useParams();
@@ -39,7 +87,7 @@ export default function CustomerDetails() {
   }
 
   function totalSpent() {
-    return invoices.reduce((sum, i) => sum + i.totalAmount, 0).toLocaleString();
+    return invoices.reduce((sum, i) => sum + (i.totalAmount || 0), 0).toLocaleString();
   }
 
   function saveEdit() {
@@ -92,52 +140,67 @@ export default function CustomerDetails() {
   if (!customer) return null;
 
   return (
-    <div className="p-4 font-sans">
-
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-medium text-teal-800">{getInitials(customer.name)}</div>
-        <div className="flex-1">
-          <p className="text-lg font-semibold">{customer.name}</p>
-          <p className="text-sm text-gray-500 mt-0.5">{customer.phone}</p>
+    <div style={styles.wrapper}>
+      <div style={styles.pageHeader}>
+        <div>
+          <h1 style={styles.title}>Customer Details</h1>
+          <p style={styles.subtitle}>View and manage customer information.</p>
         </div>
-        <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-800">Active</span>
-        <button className="px-3 py-2 text-sm border rounded-md text-gray-600" onClick={() => { setEditName(customer.name); setEditPhone(customer.phone); setEditMode(true); }}>
-          Edit
-        </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mb-6">
-        <div className="bg-gray-100 rounded p-3 text-center"><p className="text-xs text-gray-500 mb-1">Vehicles</p><p className="text-2xl font-semibold">{vehicles.length}</p></div>
-        <div className="bg-gray-100 rounded p-3 text-center"><p className="text-xs text-gray-500 mb-1">Invoices</p><p className="text-2xl font-semibold">{invoices.length}</p></div>
-        <div className="bg-gray-100 rounded p-3 text-center"><p className="text-xs text-gray-500 mb-1">Total spent</p><p className="text-2xl font-semibold">${totalSpent()}</p></div>
+      <div style={styles.customerCard}>
+        <div style={styles.avatar}>{getInitials(customer.name)}</div>
+        <div style={{ flex: 1 }}>
+          <p style={styles.custName}>{customer.name}</p>
+          <p style={styles.custPhone}>{customer.phone}</p>
+        </div>
+        <div style={styles.headerActions}>
+          <span style={styles.badgeGreen}>Active</span>
+          <button style={styles.editBtn} onClick={() => { setEditName(customer.name); setEditPhone(customer.phone); setEditMode(true); }}>Edit</button>
+        </div>
       </div>
 
-      <div className="flex gap-2 mb-5">
-        {["vehicles", "invoices", "add"].map((tab) => (
+      <div style={styles.statsGrid}>
+        <div style={styles.statCard}>
+          <p style={styles.statLabel}>Vehicles</p>
+          <p style={styles.statValue}>{vehicles.length}</p>
+        </div>
+        <div style={styles.statCard}>
+          <p style={styles.statLabel}>Invoices</p>
+          <p style={styles.statValue}>{invoices.length}</p>
+        </div>
+        <div style={styles.statCard}>
+          <p style={styles.statLabel}>Total spent</p>
+          <p style={styles.statValue}>Rs. {totalSpent()}</p>
+        </div>
+      </div>
+
+      <div style={styles.tabs}>
+        {['vehicles', 'invoices', 'add'].map((tab) => (
           <button
             key={tab}
-            className={`px-4 py-2 text-sm border rounded-full transition ${activeTab === tab ? 'bg-blue-100 text-teal-800 border-transparent' : 'text-gray-600'}`}
             onClick={() => setActiveTab(tab)}
+            style={{ ...styles.tabBtn, ...(activeTab === tab ? styles.tabActive : {}) }}
           >
-            {tab === "add" ? "+ Add Vehicle" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === 'add' ? '+ Add Vehicle' : tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
       </div>
 
-      {activeTab === "vehicles" && (
-        <div className="bg-white border rounded p-4 mb-4">
+      {activeTab === 'vehicles' && (
+        <div style={styles.card}>
           {vehicles.length === 0 ? (
-            <p className="text-gray-500">No vehicles registered.</p>
+            <p style={styles.empty}>No vehicles registered.</p>
           ) : (
             vehicles.map((v) => (
-              <div key={v.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
+              <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '0.5px solid #f0f0f0' }}>
                 <div>
-                  <span className="font-medium text-sm">{v.vehicleNumber}</span>
-                  <span className="text-sm text-gray-500"> · {v.make} · {v.year}</span>
+                  <div style={styles.itemTitle}>{v.vehicleNumber}</div>
+                  <div style={styles.itemSub}>{v.make} · {v.year}</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-teal-800">Vehicle</span>
-                  <button className="bg-red-50 text-red-700 px-3 py-1 rounded" onClick={() => removeVehicle(v.id)}>Remove</button>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={styles.badgeTeal}>Vehicle</span>
+                  <button style={styles.dangerBtn} onClick={() => removeVehicle(v.id)}>Remove</button>
                 </div>
               </div>
             ))
@@ -145,26 +208,26 @@ export default function CustomerDetails() {
         </div>
       )}
 
-      {activeTab === "invoices" && (
-        <div className="bg-white border rounded p-4 mb-4">
+      {activeTab === 'invoices' && (
+        <div style={styles.card}>
           {invoices.length === 0 ? (
-            <p className="text-gray-500">No invoices found.</p>
+            <p style={styles.empty}>No invoices found.</p>
           ) : (
             invoices.map((i) => (
-              <div key={i.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
+              <div key={i.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '0.5px solid #f0f0f0' }}>
                 <div>
-                  <span className="font-medium text-sm">Invoice #{i.id}</span>
-                  <span className="text-sm text-gray-500"> · {i.date}</span>
+                  <div style={styles.itemTitle}>Invoice #{i.id}</div>
+                  <div style={styles.itemSub}>{i.date}</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={i.status === "Paid" ? 'inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-800' : 'inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800'}>{i.status}</span>
-                  <span className="font-medium">${i.totalAmount?.toLocaleString()}</span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={i.status === 'Paid' ? styles.badgeGreen : styles.badgeAmber}>{i.status}</span>
+                  <div style={styles.itemTitle}>Rs. {i.totalAmount?.toLocaleString()}</div>
                   <button
-                    className="bg-blue-100 text-teal-800 px-3 py-1 rounded text-sm"
+                    style={styles.primaryBtn}
                     onClick={() => sendInvoice(i.id)}
                     disabled={sendingInvoiceId === i.id}
                   >
-                    {sendingInvoiceId === i.id ? "Sending..." : "Send Email"}
+                    {sendingInvoiceId === i.id ? 'Sending...' : 'Send Email'}
                   </button>
                 </div>
               </div>
@@ -173,32 +236,34 @@ export default function CustomerDetails() {
         </div>
       )}
 
-      {activeTab === "add" && (
-        <div className="bg-white border rounded p-4 mb-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Add vehicle</p>
-          <div className="grid grid-cols-2 gap-2 mb-2">
-            <input className="text-sm p-2 border rounded w-full" placeholder="Plate number" value={newPlate} onChange={(e) => setNewPlate(e.target.value)} />
-            <input className="text-sm p-2 border rounded w-full" placeholder="Make & model" value={newMake} onChange={(e) => setNewMake(e.target.value)} />
+      {activeTab === 'add' && (
+        <div style={styles.card}>
+          <p style={styles.sectionTitle}>Add vehicle</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+            <input style={styles.input} placeholder="Plate number" value={newPlate} onChange={(e) => setNewPlate(e.target.value)} />
+            <input style={styles.input} placeholder="Make & model" value={newMake} onChange={(e) => setNewMake(e.target.value)} />
           </div>
-          <input className="text-sm p-2 border rounded w-full mb-3" placeholder="Year" value={newYear} onChange={(e) => setNewYear(e.target.value)} />
-          <button className="bg-blue-100 text-teal-800 px-4 py-2 rounded font-medium" onClick={addVehicle}>Add vehicle</button>
+          <input style={{ ...styles.input, marginBottom: 14 }} placeholder="Year" value={newYear} onChange={(e) => setNewYear(e.target.value)} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button style={styles.primaryBtn} onClick={addVehicle}>Add vehicle</button>
+            <button style={styles.secondaryBtn} onClick={() => setActiveTab('vehicles')}>Cancel</button>
+          </div>
         </div>
       )}
 
       {editMode && (
-        <div className="bg-white border rounded p-4 mb-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Edit customer</p>
-          <div className="grid gap-2 mb-3">
-            <input className="text-sm p-2 border rounded w-full" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Full name" />
-            <input className="text-sm p-2 border rounded w-full" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Phone number" />
+        <div style={styles.card}>
+          <p style={styles.sectionTitle}>Edit customer</p>
+          <div style={{ display: 'grid', gap: 10, marginBottom: 14 }}>
+            <input style={styles.input} value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Full name" />
+            <input style={styles.input} value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Phone number" />
           </div>
-          <div className="flex gap-2">
-            <button className="bg-blue-100 text-teal-800 px-4 py-2 rounded font-medium" onClick={saveEdit}>Save</button>
-            <button className="px-3 py-2 text-sm border rounded-md text-gray-600" onClick={() => setEditMode(false)}>Cancel</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button style={styles.primaryBtn} onClick={saveEdit}>Save</button>
+            <button style={styles.secondaryBtn} onClick={() => setEditMode(false)}>Cancel</button>
           </div>
         </div>
       )}
-
     </div>
   );
 }
