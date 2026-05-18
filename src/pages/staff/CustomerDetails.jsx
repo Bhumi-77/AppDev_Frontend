@@ -100,23 +100,28 @@ export default function CustomerDetails() {
   }
 
   function addVehicle() {
-    if (!newPlate || !newMake) return;
-    axios
-      .post(`/customers/${id}/vehicles`, {
-        vehicleNumber: newPlate,
-        make: newMake,
-        year: parseInt(newYear) || new Date().getFullYear(),
-      })
-      .then((res) => {
-        setVehicles((prev) => [...prev, res.data]);
-        setNewPlate("");
-        setNewMake("");
-        setNewYear("");
-        setActiveTab("vehicles");
-      })
-      .catch(() => alert("Failed to add vehicle."));
-  }
+  if (!newPlate || !newMake) return;
 
+  axios
+    .post(`/vehicles`, {
+      vehicleNumber: newPlate,
+      model: newMake,
+      customerId: parseInt(id),
+    })
+    .then((res) => {
+      setVehicles((prev) => [...prev, res.data]);
+
+      setNewPlate("");
+      setNewMake("");
+      setNewYear("");
+
+      setActiveTab("vehicles");
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Failed to add vehicle.");
+    });
+}
   function removeVehicle(vehicleId) {
     axios
       .delete(`/vehicles/${vehicleId}`)
