@@ -9,6 +9,7 @@ import Notifications from "./pages/Admin/Notifications";
 import CustomerSignup from "./pages/customer/CustomerSignup";
 import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerLogin from "./pages/customer/CustomerLogin";
+import StaffReports from "./pages/staff/StaffReports";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="financial-reports" element={<FinancialReports />} />
           <Route path="low-stock-alerts" element={<LowStockAlerts />} />
           <Route path="notifications" element={<Notifications />} />
+          <Route path="staff-reports" element={<StaffReports />} />
           <Route path="pending-credit-reminders" element={<PendingCreditReminders />} />
         </Route>
       </Routes>

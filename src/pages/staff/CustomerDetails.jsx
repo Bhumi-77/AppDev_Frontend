@@ -2,40 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "../../api/axios";
 
-// ✅ styles must be defined BEFORE the component
-const styles = {
-  wrapper: { padding: "1rem 0", fontFamily: "sans-serif" },
-  header: { display: "flex", gap: 12, alignItems: "center", marginBottom: "1.5rem" },
-  avatar: { width: 48, height: 48, borderRadius: "50%", background: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 500, fontSize: 15, color: "#0C447C", flexShrink: 0 },
-  custName: { margin: 0, fontSize: 18, fontWeight: 500 },
-  custPhone: { margin: "2px 0 0", fontSize: 13, color: "#888" },
-  statsGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: "1.5rem" },
-  statCard: { background: "#f5f5f5", borderRadius: 8, padding: "12px 16px", textAlign: "center" },
-  statLabel: { fontSize: 12, color: "#888", margin: "0 0 4px" },
-  statValue: { fontSize: 22, fontWeight: 500, margin: 0 },
-  tabs: { display: "flex", gap: 8, marginBottom: "1.25rem" },
-  tabBtn: { padding: "6px 16px", fontSize: 14, border: "0.5px solid #ccc", background: "transparent", borderRadius: 8, cursor: "pointer", color: "#555" },
-  tabActive: { background: "#E6F1FB", color: "#0C447C", borderColor: "transparent" },
-  card: { background: "#fff", border: "0.5px solid #e0e0e0", borderRadius: 12, padding: "1rem 1.25rem", marginBottom: "1rem" },
-  itemRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "0.5px solid #eee" },
-  itemTitle: { fontWeight: 500, fontSize: 14 },
-  itemSub: { color: "#888", fontSize: 13 },
-  sectionTitle: { fontSize: 13, fontWeight: 500, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 10px" },
-  input: { fontSize: 14, padding: "7px 12px", border: "0.5px solid #ccc", borderRadius: 8, width: "100%", boxSizing: "border-box" },
-  primaryBtn: { background: "#E6F1FB", color: "#0C447C", border: "none", padding: "8px 20px", borderRadius: 8, fontSize: 14, cursor: "pointer", fontWeight: 500 },
-  dangerBtn: { background: "#FCEBEB", color: "#A32D2D", border: "none", padding: "6px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer" },
-  badgeBlue: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#E6F1FB", color: "#0C447C" },
-  badgeGreen: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#EAF3DE", color: "#27500A" },
-  badgeAmber: { display: "inline-block", fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 99, background: "#FAEEDA", color: "#633806" },
-  empty: { color: "#888", fontSize: 14, textAlign: "center", padding: "1.5rem 0" },
-};
 
-// ✅ component comes AFTER styles
 export default function CustomerDetails() {
   const { id } = useParams();
   const [customer, setCustomer] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [sendingInvoiceId, setSendingInvoiceId] = useState(null);
   const [activeTab, setActiveTab] = useState("vehicles");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -104,36 +77,46 @@ export default function CustomerDetails() {
       .catch(() => alert("Failed to remove vehicle."));
   }
 
-  if (loading) return <p style={styles.empty}>Loading...</p>;
-  if (error) return <p style={{ ...styles.empty, color: "red" }}>{error}</p>;
+  function sendInvoice(invoiceId) {
+    if (!invoiceId) return;
+    setSendingInvoiceId(invoiceId);
+    axios
+      .post(`/invoices/${invoiceId}/send`)
+      .then(() => alert("Invoice sent to customer email."))
+      .catch(() => alert("Failed to send invoice. Ensure backend/mail service is running."))
+      .finally(() => setSendingInvoiceId(null));
+  }
+
+  if (loading) return <p className="text-gray-500 text-sm text-center py-6">Loading...</p>;
+  if (error) return <p className="text-red-600 text-sm text-center py-6">{error}</p>;
   if (!customer) return null;
 
   return (
-    <div style={styles.wrapper}>
+    <div className="p-4 font-sans">
 
-      <div style={styles.header}>
-        <div style={styles.avatar}>{getInitials(customer.name)}</div>
-        <div style={{ flex: 1 }}>
-          <p style={styles.custName}>{customer.name}</p>
-          <p style={styles.custPhone}>{customer.phone}</p>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-medium text-teal-800">{getInitials(customer.name)}</div>
+        <div className="flex-1">
+          <p className="text-lg font-semibold">{customer.name}</p>
+          <p className="text-sm text-gray-500 mt-0.5">{customer.phone}</p>
         </div>
-        <span style={styles.badgeGreen}>Active</span>
-        <button style={styles.tabBtn} onClick={() => { setEditName(customer.name); setEditPhone(customer.phone); setEditMode(true); }}>
+        <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-800">Active</span>
+        <button className="px-3 py-2 text-sm border rounded-md text-gray-600" onClick={() => { setEditName(customer.name); setEditPhone(customer.phone); setEditMode(true); }}>
           Edit
         </button>
       </div>
 
-      <div style={styles.statsGrid}>
-        <div style={styles.statCard}><p style={styles.statLabel}>Vehicles</p><p style={styles.statValue}>{vehicles.length}</p></div>
-        <div style={styles.statCard}><p style={styles.statLabel}>Invoices</p><p style={styles.statValue}>{invoices.length}</p></div>
-        <div style={styles.statCard}><p style={styles.statLabel}>Total spent</p><p style={styles.statValue}>${totalSpent()}</p></div>
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        <div className="bg-gray-100 rounded p-3 text-center"><p className="text-xs text-gray-500 mb-1">Vehicles</p><p className="text-2xl font-semibold">{vehicles.length}</p></div>
+        <div className="bg-gray-100 rounded p-3 text-center"><p className="text-xs text-gray-500 mb-1">Invoices</p><p className="text-2xl font-semibold">{invoices.length}</p></div>
+        <div className="bg-gray-100 rounded p-3 text-center"><p className="text-xs text-gray-500 mb-1">Total spent</p><p className="text-2xl font-semibold">${totalSpent()}</p></div>
       </div>
 
-      <div style={styles.tabs}>
+      <div className="flex gap-2 mb-5">
         {["vehicles", "invoices", "add"].map((tab) => (
           <button
             key={tab}
-            style={{ ...styles.tabBtn, ...(activeTab === tab ? styles.tabActive : {}) }}
+            className={`px-4 py-2 text-sm border rounded-full transition ${activeTab === tab ? 'bg-blue-100 text-teal-800 border-transparent' : 'text-gray-600'}`}
             onClick={() => setActiveTab(tab)}
           >
             {tab === "add" ? "+ Add Vehicle" : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -142,19 +125,19 @@ export default function CustomerDetails() {
       </div>
 
       {activeTab === "vehicles" && (
-        <div style={styles.card}>
+        <div className="bg-white border rounded p-4 mb-4">
           {vehicles.length === 0 ? (
-            <p style={styles.empty}>No vehicles registered.</p>
+            <p className="text-gray-500">No vehicles registered.</p>
           ) : (
             vehicles.map((v) => (
-              <div key={v.id} style={styles.itemRow}>
+              <div key={v.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
                 <div>
-                  <span style={styles.itemTitle}>{v.vehicleNumber}</span>
-                  <span style={styles.itemSub}> · {v.make} · {v.year}</span>
+                  <span className="font-medium text-sm">{v.vehicleNumber}</span>
+                  <span className="text-sm text-gray-500"> · {v.make} · {v.year}</span>
                 </div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <span style={styles.badgeBlue}>Vehicle</span>
-                  <button style={styles.dangerBtn} onClick={() => removeVehicle(v.id)}>Remove</button>
+                <div className="flex items-center gap-2">
+                  <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-teal-800">Vehicle</span>
+                  <button className="bg-red-50 text-red-700 px-3 py-1 rounded" onClick={() => removeVehicle(v.id)}>Remove</button>
                 </div>
               </div>
             ))
@@ -163,19 +146,26 @@ export default function CustomerDetails() {
       )}
 
       {activeTab === "invoices" && (
-        <div style={styles.card}>
+        <div className="bg-white border rounded p-4 mb-4">
           {invoices.length === 0 ? (
-            <p style={styles.empty}>No invoices found.</p>
+            <p className="text-gray-500">No invoices found.</p>
           ) : (
             invoices.map((i) => (
-              <div key={i.id} style={styles.itemRow}>
+              <div key={i.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
                 <div>
-                  <span style={styles.itemTitle}>Invoice #{i.id}</span>
-                  <span style={styles.itemSub}> · {i.date}</span>
+                  <span className="font-medium text-sm">Invoice #{i.id}</span>
+                  <span className="text-sm text-gray-500"> · {i.date}</span>
                 </div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <span style={i.status === "Paid" ? styles.badgeGreen : styles.badgeAmber}>{i.status}</span>
-                  <span style={styles.itemTitle}>${i.totalAmount?.toLocaleString()}</span>
+                <div className="flex items-center gap-2">
+                  <span className={i.status === "Paid" ? 'inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-800' : 'inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800'}>{i.status}</span>
+                  <span className="font-medium">${i.totalAmount?.toLocaleString()}</span>
+                  <button
+                    className="bg-blue-100 text-teal-800 px-3 py-1 rounded text-sm"
+                    onClick={() => sendInvoice(i.id)}
+                    disabled={sendingInvoiceId === i.id}
+                  >
+                    {sendingInvoiceId === i.id ? "Sending..." : "Send Email"}
+                  </button>
                 </div>
               </div>
             ))
@@ -184,27 +174,27 @@ export default function CustomerDetails() {
       )}
 
       {activeTab === "add" && (
-        <div style={styles.card}>
-          <p style={styles.sectionTitle}>Add vehicle</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-            <input style={styles.input} placeholder="Plate number" value={newPlate} onChange={(e) => setNewPlate(e.target.value)} />
-            <input style={styles.input} placeholder="Make & model" value={newMake} onChange={(e) => setNewMake(e.target.value)} />
+        <div className="bg-white border rounded p-4 mb-4">
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Add vehicle</p>
+          <div className="grid grid-cols-2 gap-2 mb-2">
+            <input className="text-sm p-2 border rounded w-full" placeholder="Plate number" value={newPlate} onChange={(e) => setNewPlate(e.target.value)} />
+            <input className="text-sm p-2 border rounded w-full" placeholder="Make & model" value={newMake} onChange={(e) => setNewMake(e.target.value)} />
           </div>
-          <input style={{ ...styles.input, marginBottom: 12 }} placeholder="Year" value={newYear} onChange={(e) => setNewYear(e.target.value)} />
-          <button style={styles.primaryBtn} onClick={addVehicle}>Add vehicle</button>
+          <input className="text-sm p-2 border rounded w-full mb-3" placeholder="Year" value={newYear} onChange={(e) => setNewYear(e.target.value)} />
+          <button className="bg-blue-100 text-teal-800 px-4 py-2 rounded font-medium" onClick={addVehicle}>Add vehicle</button>
         </div>
       )}
 
       {editMode && (
-        <div style={styles.card}>
-          <p style={styles.sectionTitle}>Edit customer</p>
-          <div style={{ display: "grid", gap: 10, marginBottom: 12 }}>
-            <input style={styles.input} value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Full name" />
-            <input style={styles.input} value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Phone number" />
+        <div className="bg-white border rounded p-4 mb-4">
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Edit customer</p>
+          <div className="grid gap-2 mb-3">
+            <input className="text-sm p-2 border rounded w-full" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Full name" />
+            <input className="text-sm p-2 border rounded w-full" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Phone number" />
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button style={styles.primaryBtn} onClick={saveEdit}>Save</button>
-            <button style={styles.tabBtn} onClick={() => setEditMode(false)}>Cancel</button>
+          <div className="flex gap-2">
+            <button className="bg-blue-100 text-teal-800 px-4 py-2 rounded font-medium" onClick={saveEdit}>Save</button>
+            <button className="px-3 py-2 text-sm border rounded-md text-gray-600" onClick={() => setEditMode(false)}>Cancel</button>
           </div>
         </div>
       )}
