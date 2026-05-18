@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
 import './App.css';
 
 // Staff Pages
@@ -24,6 +24,11 @@ import PendingCreditReminders from "./pages/Admin/PendingCreditReminders";
 import CustomerSignup from "./pages/customer/CustomerSignup";
 import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerLogin from "./pages/customer/CustomerLogin";
+
+// Vendor / Purchase Pages (incoming branch)
+import VendorPage from './pages/VendorPage';
+import PartsPage from './pages/PartsPage';
+import PurchaseInvoicePage from './pages/PurchaseInvoicePage';
 
 const NAV_ITEMS = [
   { to: "/dashboard",  label: "Dashboard",       icon: "⊞" },
@@ -116,6 +121,7 @@ function AppLayout() {
   );
 }
 
+
 function App() {
   return (
     <BrowserRouter>
@@ -135,6 +141,10 @@ function App() {
           <Route path="customers/:id" element={<CustomerDetails />} />
           <Route path="pending-credit-reminders" element={<PendingCreditReminders />} />
         </Route>
+
+        <Route path="/vendors" element={<VendorPage />} />
+        <Route path="/parts" element={<PartsPage />} />
+        <Route path="/invoices" element={<PurchaseInvoicePage />} />
 
         {/* Staff Layout Fallback Structure */}
         <Route path="/*" element={<AppLayout />} />
