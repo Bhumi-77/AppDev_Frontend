@@ -34,7 +34,7 @@ const sidebarSections = [
   {
     items: [
       { label: "Staff Management", icon: Users, path: "/staff-management" },
-     
+      { label: "Register Customer", icon: UserPlus, path: "/register-customer" },
     ],
   },
   {

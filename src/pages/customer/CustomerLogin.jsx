@@ -23,7 +23,7 @@ export default function CustomerLogin() {
     setMessage("");
 
     try {
-      const response = await axios.post("/user/login", { email: email.trim(), password });
+      const response = await axios.post("/auth/login", { email: email.trim(), password });
       const data = response.data;
       if (data?.success) {
         const token = data.token || data?.accessToken || "";

@@ -10,6 +10,8 @@ import CustomerSignup from "./pages/customer/CustomerSignup";
 import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerLogin from "./pages/customer/CustomerLogin";
 import StaffReports from "./pages/staff/StaffReports";
+import CustomerDetails from "./pages/staff/CustomerDetails";
+import RegisterCustomer from "./pages/staff/RegisterCustomer";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Route path="low-stock-alerts" element={<LowStockAlerts />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="staff-reports" element={<StaffReports />} />
+          <Route path="register-customer" element={<RegisterCustomer />} />
+          <Route path="customers/:id" element={<CustomerDetails />} />
           <Route path="pending-credit-reminders" element={<PendingCreditReminders />} />
         </Route>
       </Routes>

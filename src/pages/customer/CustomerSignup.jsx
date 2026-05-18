@@ -18,9 +18,9 @@ export default function CustomerSignup() {
     setLoading(true);
     setMessage("");
     const payload = {
-      name: form.name.trim(),
+      fullName: form.name.trim(),
       email: form.email.trim(),
-      phone: form.phone.trim(),
+      phoneNumber: form.phone.trim(),
       password: form.password,
       vehicles: form.vehicleNumber ? [
         {
@@ -32,7 +32,7 @@ export default function CustomerSignup() {
     };
 
     try {
-      const response = await axios.post("/user/register", payload);
+      const response = await axios.post("/auth/register", payload);
       const data = response.data;
 
       if (data?.success) {
@@ -48,7 +48,13 @@ export default function CustomerSignup() {
       }
     } catch (error) {
       setMsgType("error");
-      setMessage(error.response?.data?.message || "Failed to register. Please check your details.");
+      const serverMessage = error.response?.data?.message;
+      const serverErrors = error.response?.data?.errors;
+      setMessage(
+        serverErrors?.length
+          ? serverErrors.join(" ")
+          : serverMessage || "Failed to register. Please check your details."
+      );
     } finally {
       setLoading(false);
     }
