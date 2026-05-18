@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { getAllInvoices, createInvoice } from "../api/purchaseInvoiceApi";
 import { getAllVendors } from "../api/vendorApi";
 import { getAllParts } from "../api/partApi";
+// SideBar Layout
+import AdminLayout from "../components/AdminLayout";
 
 export default function PurchaseInvoicePage() {
   const [invoices, setInvoices] = useState([]);
@@ -50,7 +52,7 @@ export default function PurchaseInvoicePage() {
     const updated = [...items];
     updated[index][field] = value;
 
-    // Autofill cost price from parts list when part a is selected
+    // Autofill cost price from parts list when a part is selected
     if (field === "partId") {
       const selectedPart = parts.find((p) => p.id === parseInt(value));
       if (selectedPart) updated[index].costPrice = selectedPart.costPrice;
@@ -111,34 +113,32 @@ export default function PurchaseInvoicePage() {
   };
 
   return (
-    <div style={styles.pageBackground}>
-      <div style={styles.container}>
-
+    <AdminLayout>
+      <div style={styles.contentPadding}>
         {/* Header */}
-        <div style={styles.header}>
+        <div style={styles.pageHeader}>
           <div>
             <h1 style={styles.title}>Purchase Invoices</h1>
-            <p style={styles.subtitle}>Record stock purchases from vendors </p>
+            <p style={styles.subtitle}>Record stock purchases from vendors and update inventory.</p>
           </div>
-          <button style={styles.addBtn} onClick={() => { resetForm(); setShowForm(true); }}>
-            + Add New Purchase Invoice
+          <button style={styles.submitBtn} onClick={() => { resetForm(); setShowForm(true); }}>
+            + Create New Invoice
           </button>
         </div>
 
         {error && <div style={styles.errorBox}>{error}</div>}
 
-        {/* Form */}
+        {/* Create Invoice Form Card */}
         {showForm && (
-          <div style={styles.formCard}>
+          <div style={styles.card}>
             <div style={styles.formHeader}>
-              <h2 style={styles.formTitle}>Create Purchase Invoice</h2>
+              <h2 style={styles.formTitle}>New Purchase Record</h2>
             </div>
             <form onSubmit={handleSubmit} style={styles.formPadding}>
-
               {/* Invoice Header Fields */}
               <div style={styles.formGrid}>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Vendor</label>
+                  <label style={styles.label}>Supplier / Vendor</label>
                   <select style={styles.input} name="vendorId" value={formData.vendorId} onChange={handleFormChange} required>
                     <option value="">-- Select Vendor --</option>
                     {vendors.map((v) => (
@@ -147,29 +147,20 @@ export default function PurchaseInvoicePage() {
                   </select>
                 </div>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Purchase Date</label>
+                  <label style={styles.label}>Transaction Date</label>
                   <input style={styles.input} type="date" name="purchaseDate" value={formData.purchaseDate} onChange={handleFormChange} required />
                 </div>
                 <div style={{ ...styles.formGroup, gridColumn: "1 / -1" }}>
-                  <label style={styles.label}>Notes (optional)</label>
-                  <input style={styles.input} name="notes" value={formData.notes} onChange={handleFormChange} placeholder="e.g. Monthly orders restocks" />
+                  <label style={styles.label}>Purchase Notes</label>
+                  <input style={styles.input} name="notes" value={formData.notes} onChange={handleFormChange} placeholder="e.g. Bulk restock for part..." />
                 </div>
               </div>
 
-              {/* Line Items */}
+              {/* Line Items Section */}
               <div style={styles.itemsSection}>
                 <div style={styles.itemsHeader}>
-                  <h3 style={styles.itemsTitle}>Parts Ordered</h3>
-                  <button type="button" style={styles.addItemBtn} onClick={addItem}>+ Add Row</button>
-                </div>
-
-                {/* Items Table Header */}
-                <div style={styles.itemRow}>
-                  <span style={{ ...styles.itemCell, flex: 3, fontWeight: "700", color: "#64748b", fontSize: "12px", textTransform: "uppercase" }}>Part</span>
-                  <span style={{ ...styles.itemCell, flex: 1, fontWeight: "700", color: "#64748b", fontSize: "12px", textTransform: "uppercase" }}>Qty</span>
-                  <span style={{ ...styles.itemCell, flex: 1, fontWeight: "700", color: "#64748b", fontSize: "12px", textTransform: "uppercase" }}>Cost Price</span>
-                  <span style={{ ...styles.itemCell, flex: 1, fontWeight: "700", color: "#64748b", fontSize: "12px", textTransform: "uppercase" }}>Line Total</span>
-                  <span style={{ width: "36px" }}></span>
+                  <h3 style={styles.itemsTitle}>Order Items</h3>
+                  <button type="button" style={styles.addItemBtn} onClick={addItem}>+ Add Item</button>
                 </div>
 
                 {items.map((item, index) => (
@@ -184,7 +175,7 @@ export default function PurchaseInvoicePage() {
                         <option value="">-- Select Part --</option>
                         {parts.map((p) => (
                           <option key={p.id} value={p.id}>
-                            {p.name} (Stock: {p.stockQuantity})
+                            {p.name} (Current Stock: {p.stockQuantity})
                           </option>
                         ))}
                       </select>
@@ -205,7 +196,7 @@ export default function PurchaseInvoicePage() {
                         style={styles.input}
                         type="number"
                         step="0.01"
-                        placeholder="0.00"
+                        placeholder="Price"
                         value={item.costPrice}
                         onChange={(e) => handleItemChange(index, "costPrice", e.target.value)}
                         required
@@ -218,51 +209,60 @@ export default function PurchaseInvoicePage() {
                   </div>
                 ))}
 
-                {/* Total */}
+                {/* Calculation Summary */}
                 <div style={styles.totalRow}>
-                  <span style={styles.totalLabel}>Total Amount</span>
+                  <span style={styles.totalLabel}>Grand Total</span>
                   <span style={styles.totalAmount}>Rs. {calcTotal()}</span>
                 </div>
               </div>
 
               <div style={styles.formActions}>
-                <button type="submit" style={styles.saveBtn}>Create Invoice & Update Stock</button>
-                <button type="button" style={styles.cancelBtn} onClick={resetForm}>Cancel</button>
+                <button type="submit" style={styles.submitBtn}>Confirm & Update Stock</button>
+                <button type="button" style={styles.cancelBtn} onClick={resetForm}>Discard</button>
               </div>
             </form>
           </div>
         )}
 
-        {/* Invoice Detail Panel */}
+        {/* Invoice Detail Card */}
         {selectedInvoice && (
-          <div style={styles.detailCard}>
+          <div style={styles.card}>
             <div style={styles.detailHeader}>
-              <h3 style={styles.detailTitle}>Invoice #{selectedInvoice.invoiceNumber}</h3>
-              <button style={styles.closePanelBtn} onClick={() => setSelectedInvoice(null)}>X Close</button>
+              <h3 style={styles.detailTitle}>Details: {selectedInvoice.invoiceNumber}</h3>
+              <button style={styles.cancelBtn} onClick={() => setSelectedInvoice(null)}>Close</button>
             </div>
-            <div style={styles.detailBody}>
+            <div style={styles.formPadding}>
               <div style={styles.detailGrid}>
-                <div><span style={styles.detailLabel}>Vendor</span><p style={styles.detailValue}>{selectedInvoice.vendorName}</p></div>
-                <div><span style={styles.detailLabel}>Date</span><p style={styles.detailValue}>{new Date(selectedInvoice.purchaseDate).toLocaleDateString()}</p></div>
-                <div><span style={styles.detailLabel}>Total</span><p style={{ ...styles.detailValue, color: "#0f172a", fontWeight: "800", fontSize: "18px" }}>Rs. {Number(selectedInvoice.totalAmount).toFixed(2)}</p></div>
-                <div><span style={styles.detailLabel}>Notes</span><p style={styles.detailValue}>{selectedInvoice.notes || "—"}</p></div>
+                <div>
+                    <span style={styles.label}>Vendor</span>
+                    <p style={styles.tdBold}>{selectedInvoice.vendorName}</p>
+                </div>
+                <div>
+                    <span style={styles.label}>Date</span>
+                    <p style={styles.td}>{new Date(selectedInvoice.purchaseDate).toLocaleDateString()}</p>
+                </div>
+                <div>
+                    <span style={styles.label}>Grand Total</span>
+                    <p style={{ ...styles.tdBold, color: "#14b8a6" }}>Rs. {Number(selectedInvoice.totalAmount).toFixed(2)}</p>
+                </div>
               </div>
-              <table style={{ ...styles.table, marginTop: "16px" }}>
+              
+              <table style={{ ...styles.table, marginTop: "20px" }}>
                 <thead>
                   <tr style={styles.tableHead}>
-                    <th style={styles.th}>Part</th>
+                    <th style={styles.th}>Part Name</th>
                     <th style={styles.th}>Quantity</th>
-                    <th style={styles.th}>Cost Price</th>
-                    <th style={styles.th}>Line Total</th>
+                    <th style={styles.th}>Unit Cost</th>
+                    <th style={styles.th}>Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {selectedInvoice.items.map((item) => (
-                    <tr key={item.id} style={styles.tableRow}>
+                    <tr key={item.id} style={styles.tr}>
                       <td style={styles.td}>{item.partName}</td>
                       <td style={styles.td}>{item.quantity}</td>
                       <td style={styles.td}>Rs. {Number(item.costPrice).toFixed(2)}</td>
-                      <td style={styles.td}>Rs. {Number(item.lineTotal).toFixed(2)}</td>
+                      <td style={styles.tdBold}>Rs. {Number(item.lineTotal).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -271,43 +271,44 @@ export default function PurchaseInvoicePage() {
           </div>
         )}
 
-        {/* Invoices Table */}
-        <div style={styles.tableCard}>
+        {/* Invoices List Card */}
+        <div style={styles.card}>
+          <div style={styles.tableHeader}>
+            <h3 style={styles.cardTitle}>Purchase History</h3>
+            <span style={styles.badge}>{invoices.length} Records</span>
+          </div>
+
           {loading ? (
-            <p style={styles.loadingText}>Synchronizing data...</p>
+            <p style={styles.loadingText}>Synchronizing inventory data...</p>
           ) : invoices.length === 0 ? (
-            <div style={styles.emptyBox}><p>No purchase invoices yet. Create your purchase invoice now!</p></div>
+            <div style={styles.emptyBox}>
+              <p>No purchase records found.</p>
+            </div>
           ) : (
             <div style={styles.tableWrapper}>
               <table style={styles.table}>
                 <thead>
                   <tr style={styles.tableHead}>
-                    <th style={styles.th}>Invoice No.</th>
+                    <th style={styles.th}>Invoice ID</th>
                     <th style={styles.th}>Vendor</th>
                     <th style={styles.th}>Date</th>
-                    <th style={styles.th}>Items</th>
                     <th style={styles.th}>Total Amount</th>
-                    <th style={styles.th}>Notes</th>
-                    <th style={styles.thAction}>Details</th>
+                    <th style={styles.thAction}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {invoices.map((inv) => (
-                    <tr key={inv.id} style={styles.tableRow}>
+                    <tr key={inv.id} style={styles.tr}>
                       <td style={styles.tdId}>{inv.invoiceNumber}</td>
-                      <td style={styles.tdName}>{inv.vendorName}</td>
+                      <td style={styles.tdBold}>{inv.vendorName}</td>
                       <td style={styles.td}>{new Date(inv.purchaseDate).toLocaleDateString()}</td>
-                      <td style={styles.td}>
-                        <span style={styles.categoryBadge}>{inv.items.length} part{inv.items.length !== 1 ? "s" : ""}</span>
-                      </td>
-                      <td style={{ ...styles.td, fontWeight: "700", color: "#0f172a" }}>
+                      <td style={{ ...styles.tdBold, color: "#111827" }}>
                         Rs. {Number(inv.totalAmount).toFixed(2)}
                       </td>
-                      <td style={{ ...styles.td, color: "#94a3b8" }}>{inv.notes || "—"}</td>
                       <td style={styles.td}>
                         <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                          <button style={styles.editBtn} onClick={() => setSelectedInvoice(inv)}>
-                            View
+                          <button style={styles.editLink} onClick={() => setSelectedInvoice(inv)}>
+                            View Details
                           </button>
                         </div>
                       </td>
@@ -319,87 +320,58 @@ export default function PurchaseInvoicePage() {
           )}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
 
 const styles = {
-  pageBackground: {
-    backgroundColor: "#f8fafc",
-    minHeight: "100vh",
-    width: "100%",
+  contentPadding: {
+    padding: "40px",
   },
-  container: {
-    maxWidth: "1350px",
-    margin: "0 auto",
-    padding: "40px 20px",
-    fontFamily: "'Inter', 'Segoe UI', sans-serif",
-  },
-  header: {
+  pageHeader: {
+    marginBottom: "30px",
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginBottom: "32px",
+    alignItems: "center",
   },
   title: {
-    fontSize: "30px",
+    fontSize: "26px",
     fontWeight: "800",
-    color: "#0f172a",
+    color: "#111827",
     margin: 0,
-    letterSpacing: "-0.5px",
   },
   subtitle: {
-    color: "#64748b",
+    color: "#6b7280",
+    fontSize: "14px",
     marginTop: "4px",
-    fontSize: "15px",
   },
-  addBtn: {
-    backgroundColor: "#4f46e5",
-    color: "#fff",
-    border: "none",
-    padding: "12px 24px",
-    borderRadius: "10px",
-    fontSize: "14px",
-    cursor: "pointer",
-    fontWeight: "600",
-    boxShadow: "0 4px 6px -1px rgba(79,70,229,0.2)",
-  },
-  errorBox: {
-    backgroundColor: "#fef2f2",
-    color: "#b91c1c",
-    padding: "16px",
+  card: {
+    backgroundColor: "#ffffff",
     borderRadius: "12px",
-    border: "1px solid #fecaca",
-    marginBottom: "20px",
-    fontSize: "14px",
-  },
-  formCard: {
-    backgroundColor: "#fff",
-    borderRadius: "16px",
-    marginBottom: "32px",
-    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-    border: "1px solid #e2e8f0",
-    overflow: "hidden",
+    padding: "30px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+    marginBottom: "30px",
+    border: "1px solid #e5e7eb",
   },
   formHeader: {
-    padding: "20px 24px",
     borderBottom: "1px solid #f1f5f9",
-    backgroundColor: "#fcfcfd",
+    paddingBottom: "15px",
+    marginBottom: "20px",
   },
   formTitle: {
-    fontSize: "16px",
+    fontSize: "18px",
     fontWeight: "700",
-    color: "#334155",
+    color: "#111827",
     margin: 0,
   },
   formPadding: {
-    padding: "24px",
+    padding: "0",
   },
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gridTemplateColumns: "1fr 1fr",
     gap: "20px",
-    marginBottom: "24px",
+    marginBottom: "30px",
   },
   formGroup: {
     display: "flex",
@@ -415,19 +387,18 @@ const styles = {
   },
   input: {
     padding: "12px 16px",
-    border: "1px solid #e2e8f0",
     borderRadius: "8px",
+    border: "1px solid #d1d5db",
     fontSize: "14px",
+    backgroundColor: "#f9fafb",
     outline: "none",
-    color: "#1e293b",
-    backgroundColor: "#f8fafc",
   },
   itemsSection: {
     backgroundColor: "#f8fafc",
     borderRadius: "12px",
     padding: "20px",
     marginBottom: "24px",
-    border: "1px solid #e2e8f0",
+    border: "1px solid #e5e7eb",
   },
   itemsHeader: {
     display: "flex",
@@ -442,9 +413,9 @@ const styles = {
     color: "#334155",
   },
   addItemBtn: {
-    backgroundColor: "#eff6ff",
-    color: "#2563eb",
-    border: "1px solid #bfdbfe",
+    backgroundColor: "#ffffff",
+    color: "#14b8a6",
+    border: "1px solid #14b8a6",
     padding: "6px 14px",
     borderRadius: "6px",
     cursor: "pointer",
@@ -455,40 +426,36 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    marginBottom: "10px",
+    marginBottom: "12px",
   },
   itemCell: {
     display: "flex",
   },
   lineTotal: {
-    padding: "12px 16px",
-    backgroundColor: "#f1f5f9",
-    borderRadius: "8px",
+    padding: "12px 10px",
     fontSize: "14px",
-    fontWeight: "600",
-    color: "#0f172a",
-    whiteSpace: "nowrap",
+    fontWeight: "700",
+    color: "#111827",
   },
   removeBtn: {
-    backgroundColor: "#fef2f2",
+    backgroundColor: "#fee2e2",
     color: "#dc2626",
-    border: "1px solid #fecaca",
+    border: "none",
     width: "32px",
     height: "32px",
     borderRadius: "6px",
     cursor: "pointer",
     fontSize: "12px",
     fontWeight: "700",
-    flexShrink: 0,
   },
   totalRow: {
     display: "flex",
     justifyContent: "flex-end",
     alignItems: "center",
     gap: "16px",
-    marginTop: "16px",
-    paddingTop: "16px",
-    borderTop: "2px solid #e2e8f0",
+    marginTop: "20px",
+    paddingTop: "15px",
+    borderTop: "2px solid #e5e7eb",
   },
   totalLabel: {
     fontSize: "14px",
@@ -497,94 +464,66 @@ const styles = {
     textTransform: "uppercase",
   },
   totalAmount: {
-    fontSize: "22px",
+    fontSize: "24px",
     fontWeight: "800",
-    color: "#0f172a",
+    color: "#14b8a6",
   },
   formActions: {
+    marginTop: "20px",
     display: "flex",
-    gap: "12px",
-    paddingTop: "20px",
-    borderTop: "1px solid #f1f5f9",
+    gap: "10px",
   },
-  saveBtn: {
-    backgroundColor: "#10b981",
+  submitBtn: {
+    backgroundColor: "#14b8a6",
     color: "#fff",
     border: "none",
-    padding: "12px 28px",
+    padding: "10px 24px",
     borderRadius: "8px",
-    fontSize: "14px",
+    fontWeight: "700",
     cursor: "pointer",
-    fontWeight: "600",
   },
   cancelBtn: {
-    backgroundColor: "transparent",
-    color: "#64748b",
-    border: "1px solid #e2e8f0",
-    padding: "12px 28px",
+    backgroundColor: "#f3f4f6",
+    color: "#4b5563",
+    border: "1px solid #d1d5db",
+    padding: "10px 24px",
     borderRadius: "8px",
-    fontSize: "14px",
+    fontWeight: "700",
     cursor: "pointer",
-    fontWeight: "600",
-  },
-  detailCard: {
-    backgroundColor: "#fff",
-    borderRadius: "16px",
-    marginBottom: "24px",
-    border: "1px solid #e2e8f0",
-    overflow: "hidden",
-    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
   },
   detailHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "16px 24px",
+    marginBottom: "20px",
     borderBottom: "1px solid #f1f5f9",
-    backgroundColor: "#fcfcfd",
+    paddingBottom: "15px",
   },
   detailTitle: {
     margin: 0,
-    fontSize: "15px",
-    fontWeight: "700",
-    color: "#334155",
-  },
-  closePanelBtn: {
-    background: "none",
-    border: "1px solid #e2e8f0",
-    color: "#64748b",
-    padding: "4px 12px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "13px",
-    fontWeight: "600",
-  },
-  detailBody: {
-    padding: "20px 24px",
+    fontSize: "18px",
+    fontWeight: "800",
+    color: "#111827",
   },
   detailGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-    gap: "16px",
-    marginBottom: "16px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+    gap: "20px",
   },
-  detailLabel: {
-    fontSize: "11px",
+  tableHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  },
+  badge: {
+    backgroundColor: "#f0fdfa",
+    color: "#0d9488",
+    padding: "4px 12px",
+    borderRadius: "20px",
+    fontSize: "12px",
     fontWeight: "700",
-    color: "#94a3b8",
-    textTransform: "uppercase",
-  },
-  detailValue: {
-    margin: "4px 0 0 0",
-    fontSize: "14px",
-    color: "#475569",
-  },
-  tableCard: {
-    backgroundColor: "#fff",
-    borderRadius: "16px",
-    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
-    border: "1px solid #e2e8f0",
-    overflow: "hidden",
+    border: "1px solid #ccfbf1",
   },
   tableWrapper: {
     overflowX: "auto",
@@ -592,75 +531,61 @@ const styles = {
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    textAlign: "left",
   },
   tableHead: {
-    backgroundColor: "#f8fafc",
-    borderBottom: "1px solid #e2e8f0",
+    borderBottom: "2px solid #f3f4f6",
   },
   th: {
-    padding: "16px 20px",
-    fontSize: "12px",
-    fontWeight: "700",
-    color: "#64748b",
-    textTransform: "uppercase",
-  },
-  thAction: {
-    padding: "16px 20px",
-    fontSize: "12px",
-    fontWeight: "700",
-    color: "#64748b",
-    textTransform: "uppercase",
-    textAlign: "right",
-  },
-  tableRow: {
-    borderBottom: "1px solid #f1f5f9",
-  },
-  tdId: {
-    padding: "18px 20px",
+    textAlign: "left",
+    padding: "12px 0",
     fontSize: "13px",
-    color: "#94a3b8",
     fontWeight: "600",
+    color: "#6b7280",
   },
-  tdName: {
-    padding: "18px 20px",
-    fontSize: "14px",
-    color: "#0f172a",
-    fontWeight: "700",
+  tr: {
+    borderBottom: "1px solid #f3f4f6",
   },
   td: {
-    padding: "18px 20px",
+    padding: "16px 0",
     fontSize: "14px",
-    color: "#475569",
+    color: "#374151",
+  },
+  tdId: {
+    padding: "16px 0",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#94a3b8",
+  },
+  tdBold: {
+    padding: "16px 0",
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#111827",
   },
   categoryBadge: {
     backgroundColor: "#eff6ff",
     color: "#2563eb",
-    border: "1px solid #bfdbfe",
-    padding: "4px 10px",
-    borderRadius: "20px",
-    fontSize: "12px",
+    padding: "2px 10px",
+    borderRadius: "12px",
+    fontSize: "11px",
     fontWeight: "600",
   },
-  editBtn: {
-    backgroundColor: "#eff6ff",
-    color: "#2563eb",
-    border: "1px solid #bfdbfe",
-    padding: "6px 16px",
-    borderRadius: "6px",
-    cursor: "pointer",
+  editLink: {
+    background: "none",
+    border: "none",
+    color: "#14b8a6",
     fontWeight: "600",
-    fontSize: "12px",
+    cursor: "pointer",
   },
   loadingText: {
     textAlign: "center",
     color: "#64748b",
-    padding: "60px",
-    fontSize: "15px",
+    fontSize: "16px",
+    padding: "40px",
   },
   emptyBox: {
     textAlign: "center",
     color: "#94a3b8",
-    padding: "80px",
+    padding: "40px",
   },
 };
