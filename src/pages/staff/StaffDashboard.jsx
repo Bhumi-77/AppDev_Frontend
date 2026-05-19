@@ -21,6 +21,7 @@ const styles = {
 
 const ACTIONS = [
   { to: "/", label: "Search customers", sub: "Find by name, phone, or plate", icon: "🔍", bg: "#E6F1FB" },
+  { to: "/register-customer", label: "Register Customer", sub: "Create customer accounts", icon: "📝", bg: "#FFF7ED" },
   { to: "/vendors", label: "Vendors", sub: "Manage suppliers and sources", icon: "🏭", bg: "#FFF4E6" },
   { to: "/parts", label: "Parts", sub: "Browse and edit parts catalog", icon: "📦", bg: "#EAF3DE" },
   { to: "/sell-parts", label: "Sell parts", sub: "Create sales and invoices", icon: "🛒", bg: "#E8F7FF" },
