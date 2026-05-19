@@ -23,7 +23,6 @@ import PendingCreditReminders from "./pages/Admin/PendingCreditReminders";
 // Customer Pages
 import CustomerSignup from "./pages/customer/CustomerSignup";
 import CustomerLogin from "./pages/customer/CustomerLogin";
-import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerServices from "./pages/customer/CustomerServices";
 import CustomerHistory from "./pages/customer/CustomerHistory";
 import CustomerPurchase from "./pages/customer/CustomerPurchase";
