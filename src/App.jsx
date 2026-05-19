@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
+import { Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
 import './App.css';
 
 // Staff Pages
@@ -30,16 +30,32 @@ import VendorPage from './pages/VendorPage';
 import PartsPage from './pages/PartsPage';
 import PurchaseInvoicePage from './pages/PurchaseInvoicePage';
 
-const NAV_ITEMS = [
-  { to: "/dashboard",  label: "Dashboard",       icon: "⊞" },
-  { to: "/",           label: "Search Customer", icon: "🔍" },
-  { to: "/sell-parts", label: "Sell Parts",      icon: "🛒" },
-  { to: "/add-part",   label: "Add Part",        icon: "📦" },
-  { to: "/invoice",    label: "Invoice",         icon: "🧾" },
+// Layout Link Structures based on user credentials
+const STAFF_NAV_ITEMS = [
+  { to: "/dashboard",           label: "Dashboard",       icon: "⊞" },
+  { to: "/",                    label: "Search Customer", icon: "🔍" },
+  { to: "/sell-parts",          label: "Sell Parts",      icon: "🛒" },
+  { to: "/add-part",            label: "Add Part",        icon: "📦" },
+  { to: "/invoice",             label: "Invoice",         icon: "🧾" },
+];
+
+const ADMIN_NAV_ITEMS = [
+  { to: "/admin",                    label: "Dashboard",        icon: "⊞" },
+  { to: "/admin/staff-management",   label: "Manage Staff",     icon: "👥" },
+  { to: "/admin/financial-reports",  label: "Finance Reports",  icon: "💰" },
+  { to: "/admin/low-stock-alerts",   label: "Low Stock",        icon: "⚠️" },
+  { to: "/admin/register-customer",  label: "Reg Customer",     icon: "📝" },
 ];
 
 function Sidebar() {
   const location = useLocation();
+  const userRole = sessionStorage.getItem("role") || "staff"; 
+  const rawUser = sessionStorage.getItem("user");
+  const user = rawUser ? JSON.parse(rawUser) : { fullName: "System User" };
+
+  // Render the appropriate context menu options based on authentication state
+  const currentNavItems = userRole === "admin" ? ADMIN_NAV_ITEMS : STAFF_NAV_ITEMS;
+
   return (
     <aside style={styles.sidebar}>
       <div style={styles.brand}>
@@ -48,15 +64,15 @@ function Sidebar() {
         </div>
         <div>
           <div style={styles.brandName}>AUTOPART</div>
-          <div style={styles.brandSub}>STAFF PANEL</div>
+          <div style={styles.brandSub}>{userRole.toUpperCase()} PANEL</div>
         </div>
       </div>
 
       <nav style={styles.sideNav}>
-        {NAV_ITEMS.map(({ to, label, icon }) => {
+        {currentNavItems.map(({ to, label, icon }) => {
           const active =
             location.pathname === to ||
-            (to !== "/" && location.pathname.startsWith(to));
+            (to !== "/" && to !== "/admin" && location.pathname.startsWith(to));
           return (
             <Link
               key={to}
@@ -71,10 +87,14 @@ function Sidebar() {
       </nav>
 
       <div style={styles.sidebarFooter}>
-        <div style={styles.userAvatar}>S</div>
+        <div style={styles.userAvatar}>
+          {user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
+        </div>
         <div>
-          <div style={styles.userName}>Staff User</div>
-          <div style={styles.userRole}>Staff Member</div>
+          <div style={styles.userName}>{user.fullName || "Active User"}</div>
+          <div style={styles.userRole}>
+            {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Member
+          </div>
         </div>
       </div>
     </aside>
@@ -82,15 +102,25 @@ function Sidebar() {
 }
 
 function TopBar() {
+  const userRole = sessionStorage.getItem("role") || "staff";
+  const rawUser = sessionStorage.getItem("user");
+  const user = rawUser ? JSON.parse(rawUser) : { fullName: "System User" };
+
+  const avatarInitials = user.fullName
+    ? user.fullName.split(" ").map(n => n[0]).join("").toUpperCase()
+    : "SU";
+
   return (
     <header style={styles.topBar}>
       <div style={styles.topBarRight}>
         <button style={styles.iconBtn}>🔔</button>
         <div style={styles.topUserChip}>
-          <div style={styles.topAvatar}>SU</div>
+          <div style={styles.topAvatar}>{avatarInitials}</div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 500 }}>Staff User</div>
-            <div style={{ fontSize: 11, color: "#888" }}>Staff Member</div>
+            <div style={{ fontSize: 13, fontWeight: 500 }}>{user.fullName}</div>
+            <div style={{ fontSize: 11, color: "#888" }}>
+              {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Member
+            </div>
           </div>
         </div>
       </div>
@@ -98,7 +128,8 @@ function TopBar() {
   );
 }
 
-function AppLayout() {
+// Wrapper structure component handling consistent layout decoration
+function SharedShellLayout() {
   return (
     <div style={styles.shell}>
       <Sidebar />
@@ -106,14 +137,24 @@ function AppLayout() {
         <TopBar />
         <div style={styles.content}>
           <Routes>
-            {/* Staff Routes */}
-            <Route path="/"              element={<SearchCustomer />} />
-            <Route path="/dashboard"     element={<StaffDashboard />} />
-            <Route path="/customers/:id" element={<CustomerDetails />} />
-            <Route path="/sell-parts"    element={<SellParts />} />
-            <Route path="/add-part"      element={<AddPart />} />
-            <Route path="/invoice"       element={<InvoicePage />} />
-            <Route path="/invoice/:id"   element={<InvoicePage />} />
+            {/* Staff Workflows */}
+            <Route path="/"               element={<SearchCustomer />} />
+            <Route path="/dashboard"      element={<StaffDashboard />} />
+            <Route path="/customers/:id"  element={<CustomerDetails />} />
+            <Route path="/sell-parts"     element={<SellParts />} />
+            <Route path="/add-part"       element={<AddPart />} />
+            <Route path="/invoice"        element={<InvoicePage />} />
+            <Route path="/invoice/:id"    element={<InvoicePage />} />
+
+            {/* Admin Workflows Nested in Shared Frame context */}
+            <Route path="/admin-dashboard"           element={<Dashboard />} />
+            <Route path="/admin/staff-management"   element={<StaffManagement />} />
+            <Route path="/admin/financial-reports"  element={<FinancialReports />} />
+            <Route path="/admin/low-stock-alerts"   element={<LowStockAlerts />} />
+            <Route path="/admin/notifications"      element={<Notifications />} />
+            <Route path="/admin/staff-reports"      element={<StaffReports />} />
+            <Route path="/admin/register-customer"  element={<RegisterCustomer />} />
+            <Route path="/admin/pending-credit-reminders" element={<PendingCreditReminders />} />
           </Routes>
         </div>
       </div>
@@ -121,35 +162,42 @@ function AppLayout() {
   );
 }
 
-
 function App() {
+  const userRole = sessionStorage.getItem("role");
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<CustomerLogin />} />
-        <Route path="/signup" element={<CustomerSignup />} />
-        <Route path="/profile" element={<CustomerProfile />} />
+    <Routes>
+      {/* Root/Index Redirect Route handling based on active profile session status */}
+      <Route 
+        path="/" 
+        element={
+          userRole === "admin" ? (
+            <Navigate to="/admin" replace />
+          ) : userRole === "staff" ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
+      />
 
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="staff-management" element={<StaffManagement />} />
-          <Route path="financial-reports" element={<FinancialReports />} />
-          <Route path="low-stock-alerts" element={<LowStockAlerts />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="staff-reports" element={<StaffReports />} />
-          <Route path="register-customer" element={<RegisterCustomer />} />
-          <Route path="customers/:id" element={<CustomerDetails />} />
-          <Route path="pending-credit-reminders" element={<PendingCreditReminders />} />
-        </Route>
+      {/* Auth Entry points */}
+      <Route path="/login" element={<CustomerLogin />} />
+      <Route path="/signup" element={<CustomerSignup />} />
+      <Route path="/profile" element={<CustomerProfile />} />
 
-        <Route path="/vendors" element={<VendorPage />} />
-        <Route path="/parts" element={<PartsPage />} />
-        <Route path="/invoices" element={<PurchaseInvoicePage />} />
+      {/* Dedicated structural layout prefix fallback definitions */}
+      <Route path="/admin" element={<SharedShellLayout />}>
+        <Route index element={<Dashboard />} />
+      </Route>
 
-        {/* Staff Layout Fallback Structure */}
-        <Route path="/*" element={<AppLayout />} />
-      </Routes>
-    </BrowserRouter>
+      <Route path="/vendors" element={<VendorPage />} />
+      <Route path="/parts" element={<PartsPage />} />
+      <Route path="/invoices" element={<PurchaseInvoicePage />} />
+
+      {/* Catch-all global routing wrapper shell fall-through handling metrics */}
+      <Route path="/*" element={<SharedShellLayout />} />
+    </Routes>
   );
 }
 

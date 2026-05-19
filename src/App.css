@@ -12,33 +12,9 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
-
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
 }
 
-
-/*admin --- Nabin*/
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-}
-
+/* admin --- Nabin (Scoped so they do NOT break Tailwind forms) */
 .navbar {
   background: #1f2937;
   color: white;
@@ -69,14 +45,17 @@ body {
   max-width: 500px;
 }
 
-input,
-select {
+/* These selectors now ONLY touch elements inside the Nabin admin pages */
+.page input,
+.page select,
+.card input {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
-button {
+.page button,
+.card button {
   padding: 10px 14px;
   border: none;
   background: #2563eb;
@@ -86,7 +65,8 @@ button {
   margin-right: 8px;
 }
 
-button:hover {
+.page button:hover,
+.card button:hover {
   background: #1d4ed8;
 }
 

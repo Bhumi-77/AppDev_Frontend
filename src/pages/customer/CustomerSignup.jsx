@@ -36,12 +36,9 @@ export default function CustomerSignup() {
       const data = response.data;
 
       if (data?.success) {
-        sessionStorage.setItem("user_id", data?.user?.id || data?.user?._id || "");
-        sessionStorage.setItem("user", JSON.stringify(data?.user || {}));
-        sessionStorage.setItem("token", data?.token || "");
         setMsgType("success");
-        setMessage("Registration successful! You can now manage your profile and vehicle details.");
-        setTimeout(() => navigate("/profile"), 1200);
+        setMessage("Registration successful! Redirecting to login page...");
+        setTimeout(() => navigate("/login"), 1200);
       } else {
         setMsgType("error");
         setMessage(data?.message || "Registration failed. Please try again.");
