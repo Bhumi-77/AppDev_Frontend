@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "../../api/axios";
 
 const styles = {
@@ -122,6 +122,34 @@ const styles = {
     boxShadow: "0 8px 20px rgba(20,184,154,0.25)",
     transition: "0.3s",
   },
+
+  partCard: {
+    border: "1px solid #eee",
+    borderRadius: 12,
+    padding: "14px",
+    marginTop: 12,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  actionBtn: {
+    padding: "8px 14px",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontSize: 14,
+  },
+
+  deleteBtn: {
+    padding: "8px 14px",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+    background: "#FCEBEB",
+    color: "#A32D2D",
+    fontSize: 14,
+  },
 };
 
 export default function AddPart() {
@@ -129,6 +157,22 @@ export default function AddPart() {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const [parts, setParts] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+
+  useEffect(() => {
+    fetchParts();
+  }, []);
+
+  async function fetchParts() {
+    try {
+      const res = await axios.get("/parts");
+      setParts(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   async function handleSubmit() {
     if (!name || !price || !stock) {
@@ -143,14 +187,68 @@ export default function AddPart() {
       });
 
       setSuccess(true);
+
       setName("");
       setPrice("");
       setStock("");
+
+      fetchParts();
 
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.log("ERROR:", err.response?.data);
       alert("Error adding part.");
+    }
+  }
+
+  function startEdit(part) {
+    setEditingId(part.id);
+
+    setName(part.name);
+    setPrice(part.price);
+    setStock(part.stock);
+  }
+
+  async function updatePart() {
+    try {
+      await axios.put(`/parts/${editingId}`, {
+        id: editingId,
+        name,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+      });
+
+      alert("Part updated successfully.");
+
+      setEditingId(null);
+
+      setName("");
+      setPrice("");
+      setStock("");
+
+      fetchParts();
+    } catch (err) {
+      console.log(err);
+      alert("Failed to update part.");
+    }
+  }
+
+  async function deletePart(id) {
+    const confirmDelete = window.confirm(
+      "Delete this part?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`/parts/${id}`);
+
+      setParts((prev) =>
+        prev.filter((p) => p.id !== id)
+      );
+    } catch (err) {
+      console.log(err);
+      alert("Failed to delete part.");
     }
   }
 
@@ -177,11 +275,13 @@ export default function AddPart() {
         <div style={styles.rightSection}>
           
           <div style={styles.pageHeader}>
-            <h2 style={styles.title}>Add New Part</h2>
+            <h2 style={styles.title}>
+              {editingId ? "Edit Part" : "Add New Part"}
+            </h2>
 
             <p style={styles.subtitle}>
-              Fill in the details below to add a new part
-              to the inventory system.
+              Fill in the details below to manage
+              inventory parts.
             </p>
           </div>
 
@@ -235,10 +335,65 @@ export default function AddPart() {
 
           <button
             style={styles.submitBtn}
-            onClick={handleSubmit}
+            onClick={
+              editingId ? updatePart : handleSubmit
+            }
           >
-            Add Part
+            {editingId ? "Update Part" : "Add Part"}
           </button>
+
+          {/* Parts List */}
+          <div style={{ marginTop: 30 }}>
+            <h3>Parts List</h3>
+
+            {parts.length === 0 ? (
+              <p>No parts added yet.</p>
+            ) : (
+              parts.map((part) => (
+                <div
+                  key={part.id}
+                  style={styles.partCard}
+                >
+                  <div>
+                    <strong>{part.name}</strong>
+
+                    <div
+                      style={{
+                        marginTop: 4,
+                        color: "#666",
+                      }}
+                    >
+                      Rs. {part.price} | Stock:{" "}
+                      {part.stock}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                    }}
+                  >
+                    <button
+                      style={styles.actionBtn}
+                      onClick={() => startEdit(part)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      style={styles.deleteBtn}
+                      onClick={() =>
+                        deletePart(part.id)
+                      }
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
 
         </div>
       </div>
