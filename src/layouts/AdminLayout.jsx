@@ -40,10 +40,10 @@ const sidebarSections = [
   {
    
     items: [
-      { label: "Vendor Management", icon: Truck, path: "/vendor-management" },
-      { label: "Parts Management", icon: Package, path: "/parts-management" },
+      { label: "Vendors", icon: Truck, path: "/vendors" },
+      { label: "Parts", icon: Package, path: "/parts" },
       { label: "Stock Overview", icon: Layers, path: "/stock-overview" },
-      { label: "Purchase Invoices", icon: FileText, path: "/purchase-invoices" },
+      { label: "Purchase Invoices", icon: FileText, path: "/invoices" },
       { label: "Sales Invoices", icon: Receipt, path: "/sales-invoices" },
     ],
   },
@@ -246,6 +246,15 @@ export default function AdminLayout() {
                 </p>
                 <p className="text-xs text-slate-500">Administrator</p>
               </div>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="hidden sm:inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
 
               <ChevronDown size={18} className="text-slate-500" />
             </div>
