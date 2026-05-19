@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { getAllInvoices, createInvoice } from "../api/purchaseInvoiceApi";
 import { getAllVendors } from "../api/vendorApi";
 import { getAllParts } from "../api/partApi";
-// SideBar Layout
-import AdminLayout from "../components/AdminLayout";
+
 
 export default function PurchaseInvoicePage() {
   const [invoices, setInvoices] = useState([]);
@@ -113,7 +112,6 @@ export default function PurchaseInvoicePage() {
   };
 
   return (
-    <AdminLayout>
       <div style={styles.contentPadding}>
         {/* Header */}
         <div style={styles.pageHeader}>
@@ -320,7 +318,6 @@ export default function PurchaseInvoicePage() {
           )}
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

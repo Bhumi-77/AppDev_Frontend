@@ -5,8 +5,6 @@ import {
   updateVendor,
   deleteVendor,
 } from "../api/vendorApi";
-// SideBar Layout
-import AdminLayout from "../components/AdminLayout"; 
 
 export default function VendorPage() {
   const [vendors, setVendors] = useState([]);
@@ -91,7 +89,6 @@ export default function VendorPage() {
   };
 
   return (
-    <AdminLayout>
       <div style={styles.contentPadding}>
         <div style={styles.pageHeader}>
           <div>
@@ -227,7 +224,6 @@ export default function VendorPage() {
           )}
         </div>
       </div>
-    </AdminLayout>
   );
 }
 
