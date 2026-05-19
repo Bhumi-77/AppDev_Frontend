@@ -1,28 +1,25 @@
-import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
-import './App.css';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import './App.css'
 
-// Staff Pages
-import SearchCustomer from "./pages/staff/SearchCustomer";
-import CustomerDetails from "./pages/staff/CustomerDetails";
-import SellParts from "./pages/staff/SellParts.jsx";
-import InvoicePage from "./pages/staff/InvoicePage";
-import StaffDashboard from "./pages/staff/StaffDashboard";
-import AddPart from "./pages/staff/Addparts.jsx";
+import VendorPage from './pages/VendorPage';
+import PartsPage from './pages/PartsPage';
+import PurchaseInvoicePage from './pages/PurchaseInvoicePage';
 
-// Admin Pages (Nabin)
-import AdminLayout from "./layouts/AdminLayout";
-import Dashboard from "./pages/Admin/AdminDashboard";
-import StaffManagement from "./pages/Admin/ManageStaff";
-import FinancialReports from "./pages/Admin/FinancialReports";
-import LowStockAlerts from "./pages/Admin/LowStockAlerts";
-import Notifications from "./pages/Admin/Notifications";
-import PendingCreditReminders from "./pages/Admin/PendingCreditReminders";
+import SearchCustomer from "./pages/staff/SearchCustomer"
+import CustomerDetails from "./pages/staff/CustomerDetails"
+import SellParts from "./pages/staff/SellParts.jsx"
+import InvoicePage from "./pages/staff/InvoicePage"
+import StaffDashboard from "./pages/staff/StaffDashboard"
+import AddPart from "./pages/staff/Addparts.jsx"
 
 const NAV_ITEMS = [
   { to: "/dashboard",  label: "Dashboard",       icon: "⊞" },
   { to: "/",           label: "Search Customer", icon: "🔍" },
+  { to: "/vendors",    label: "Vendors",          icon: "🏭" }, 
+  { to: "/parts",      label: "Parts Management", icon: "📦" }, 
+  { to: "/invoices",   label: "Purchase Invoices",icon: "🧾" }, 
   { to: "/sell-parts", label: "Sell Parts",      icon: "🛒" },
-  { to: "/add-part",   label: "Add Part",        icon: "📦" },
+  { to: "/add-part",   label: "Add Part",        icon: "➕" }, 
   { to: "/invoice",    label: "Invoice",         icon: "🧾" },
 ];
 
@@ -103,6 +100,10 @@ function AppLayout() {
             <Route path="/add-part"      element={<AddPart />} />
             <Route path="/invoice"       element={<InvoicePage />} />
             <Route path="/invoice/:id"   element={<InvoicePage />} />
+            <Route path="/vendors"       element={<VendorPage />} />
+            <Route path="/parts"         element={<PartsPage />} />
+            <Route path="/invoices"      element={<PurchaseInvoicePage />} />
+            <Route path="*"              element={<Navigate to="/vendors" />} /> 
           </Routes>
         </div>
       </div>
@@ -112,22 +113,7 @@ function AppLayout() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Admin Router Structure */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="staff-management" element={<StaffManagement />} />
-          <Route path="financial-reports" element={<FinancialReports />} />
-          <Route path="low-stock-alerts" element={<LowStockAlerts />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="pending-credit-reminders" element={<PendingCreditReminders />} />
-        </Route>
-
-        {/* Staff Layout Fallback Structure */}
-        <Route path="/*" element={<AppLayout />} />
-      </Routes>
-    </BrowserRouter>
+    <AppLayout />
   );
 }
 
@@ -230,4 +216,4 @@ const styles = {
   content: { padding: "28px 32px", flex: 1 },
 };
 
-export default App;
+export default App

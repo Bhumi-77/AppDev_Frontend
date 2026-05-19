@@ -1,11 +1,5 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 :root {
   font-family: Arial, sans-serif;
   line-height: 1.5;
@@ -26,18 +20,7 @@ body,
 
 body {
   margin: 0;
-  min-width: 320px;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+  padding: 0;
+  background-color: #f8fafc; /* Application Theme */
+  font-family: sans-serif;
 }
