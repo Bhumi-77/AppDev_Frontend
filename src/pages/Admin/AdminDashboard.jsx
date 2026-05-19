@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../../api/axios";
 
 function AdminDashboard() {
@@ -139,6 +140,40 @@ function AdminDashboard() {
                 </p>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Management quick links for admin */}
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-gray-900">Management</h2>
+
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link
+              to="/vendors"
+              className="flex flex-col items-start gap-2 rounded-lg border border-gray-100 bg-gray-50 px-4 py-5 hover:shadow"
+            >
+              <span className="text-lg">🏭</span>
+              <p className="font-semibold text-gray-800">Vendors</p>
+              <p className="text-sm text-gray-500">Manage supplier records and purchase sources</p>
+            </Link>
+
+            <Link
+              to="/parts"
+              className="flex flex-col items-start gap-2 rounded-lg border border-gray-100 bg-gray-50 px-4 py-5 hover:shadow"
+            >
+              <span className="text-lg">📦</span>
+              <p className="font-semibold text-gray-800">Parts</p>
+              <p className="text-sm text-gray-500">View and edit parts catalog and stock</p>
+            </Link>
+
+            <Link
+              to="/invoices"
+              className="flex flex-col items-start gap-2 rounded-lg border border-gray-100 bg-gray-50 px-4 py-5 hover:shadow"
+            >
+              <span className="text-lg">🧾</span>
+              <p className="font-semibold text-gray-800">Invoices</p>
+              <p className="text-sm text-gray-500">Browse purchase and sales invoices</p>
+            </Link>
           </div>
         </div>
 
