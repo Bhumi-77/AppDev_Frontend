@@ -22,7 +22,6 @@ import PendingCreditReminders from "./pages/Admin/PendingCreditReminders";
 
 // Customer Pages
 import CustomerSignup from "./pages/customer/CustomerSignup";
-import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerLogin from "./pages/customer/CustomerLogin";
 
 // Vendor / Purchase Pages (incoming branch)
@@ -184,7 +183,7 @@ function App() {
       {/* Auth Entry points */}
       <Route path="/login" element={<CustomerLogin />} />
       <Route path="/signup" element={<CustomerSignup />} />
-      <Route path="/profile" element={<CustomerProfile />} />
+      <Route path="/profile" element={<Navigate to="/login" replace />} />
 
       {/* Dedicated structural layout prefix fallback definitions */}
       <Route path="/admin" element={<SharedShellLayout />}>
