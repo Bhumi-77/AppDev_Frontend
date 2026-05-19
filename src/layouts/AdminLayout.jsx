@@ -34,7 +34,6 @@ const sidebarSections = [
   {
     items: [
       { label: "Staff Management", icon: Users, path: "/staff-management" },
-      { label: "Register Customer", icon: UserPlus, path: "/register-customer" },
     ],
   },
   {
@@ -140,6 +139,15 @@ export default function AdminLayout() {
                 </NavLink>
               );
             })}
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-300 transition-all hover:bg-white/10 hover:text-white"
+            >
+              <LogOut size={18} />
+              <span className="truncate">Logout</span>
+            </button>
           </div>
         </nav>
 

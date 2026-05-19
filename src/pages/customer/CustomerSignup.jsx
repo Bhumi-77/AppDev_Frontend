@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 import { saveCustomer } from "../../api/auth";
 
-// Feature 12: Customers can self-register
+
 export default function CustomerSignup() {
   const [form, setForm] = useState({
     name: "",
@@ -30,24 +30,28 @@ export default function CustomerSignup() {
 
     const payload = {
       name: form.name.trim(),
-      email: form.email.trim(),
       phone: form.phone.trim(),
-      password: form.password,
-      vehicleNumber: form.vehicleNumber.trim(),
-      make: form.make.trim(),
-      year: form.year ? parseInt(form.year, 10) : 0,
+      vehicles: [
+        {
+          vehicleNumber: form.vehicleNumber.trim(),
+          make: form.make.trim(),
+          year: form.year ? parseInt(form.year, 10) : 0,
+        },
+      ],
     };
 
     try {
-      const { data } = await axios.post("/customers/register", payload);
-      if (data?.success) {
-        saveCustomer(data.customer);
+      const response = await axios.post("/customers", payload);
+      const createdCustomer = response.data;
+
+      if (response.status === 201 && createdCustomer?.id) {
+        saveCustomer(createdCustomer);
         setMsgType("success");
         setMessage("Registration successful! Redirecting to your profile...");
         setTimeout(() => navigate("/profile"), 1000);
       } else {
         setMsgType("error");
-        setMessage(data?.message || "Registration failed. Please try again.");
+        setMessage(createdCustomer?.message || "Registration failed. Please try again.");
       }
     } catch (error) {
       setMsgType("error");

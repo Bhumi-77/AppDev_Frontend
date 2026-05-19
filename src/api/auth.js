@@ -24,6 +24,14 @@ export function clearCustomer() {
   sessionStorage.removeItem(CUSTOMER_KEY);
 }
 
+export function clearSession() {
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("role");
+  sessionStorage.removeItem("user_id");
+  sessionStorage.removeItem("user");
+  clearCustomer();
+}
+
 export function isLoggedIn() {
   return Boolean(getCustomerId());
 }

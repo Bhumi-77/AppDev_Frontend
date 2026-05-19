@@ -1,11 +1,26 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import axios from "../../api/axios";
+import { clearSession } from "../../api/auth";
 
 const styles = {
   wrapper: { padding: "0.5rem 0 2rem" },
   pageHeader: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" },
   title: { margin: 0, fontSize: 22, fontWeight: 500 },
+  logoutButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "0.65rem 1rem",
+    background: "#f8fafc",
+    color: "#0f172a",
+    borderRadius: 999,
+    border: "1px solid #cbd5e1",
+    cursor: "pointer",
+    fontSize: 13,
+    fontWeight: 600,
+  },
   subtitle: { margin: "4px 0 0", fontSize: 14, color: "#888" },
   statsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: "2rem" },
   statCard: { background: "#fff", border: "0.5px solid #e0e0e0", borderRadius: 12, padding: "1.1rem 1.25rem" },
@@ -20,15 +35,25 @@ const styles = {
 };
 
 const ACTIONS = [
-  { to: "/", label: "Search customers", sub: "Find by name, phone, or plate", icon: "🔍", bg: "#E6F1FB" },
+  { to: "/dashboard", label: "Dashboard", sub: "Overview and stats", icon: "⊞", bg: "#EAF8F4" },
+  { to: "/search", label: "Search customers", sub: "Find by name, phone, or plate", icon: "🔍", bg: "#E6F1FB" },
   { to: "/register-customer", label: "Register Customer", sub: "Create customer accounts", icon: "📝", bg: "#FFF7ED" },
-  { to: "/vendors", label: "Vendors", sub: "Manage suppliers and sources", icon: "🏭", bg: "#FFF4E6" },
-  { to: "/parts", label: "Parts", sub: "Browse and edit parts catalog", icon: "📦", bg: "#EAF3DE" },
+  { to: "/vendors", label: "Vendors", sub: "Manage supplier records", icon: "🏭", bg: "#FFF4E6" },
   { to: "/sell-parts", label: "Sell parts", sub: "Create sales and invoices", icon: "🛒", bg: "#E8F7FF" },
+  { to: "/add-part", label: "Add Part", sub: "Add new part to catalog", icon: "📦", bg: "#F0FFF4" },
+  { to: "/parts", label: "Parts", sub: "Browse and edit parts catalog", icon: "📚", bg: "#EAF3DE" },
   { to: "/invoices", label: "Invoices", sub: "View and manage billing", icon: "🧾", bg: "#FAEEDA" },
+  { to: "/admin/staff-reports", label: "Staff Reports", sub: "View staff reports", icon: "📊", bg: "#FFF4F0" },
 ];
 
 export default function StaffDashboard() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    clearSession();
+    navigate("/login", { replace: true });
+  };
+
   const [data, setData] = useState({
     totalCustomers: 0,
     totalParts: 0,
@@ -57,6 +82,10 @@ export default function StaffDashboard() {
           <h1 style={styles.title}>Staff Dashboard</h1>
           <p style={styles.subtitle}>Welcome back — here's an overview of the system.</p>
         </div>
+        <button type="button" style={styles.logoutButton} onClick={handleLogout}>
+          <LogOut size={16} />
+          Logout
+        </button>
       </div>
 
       <div style={styles.statsGrid}>

@@ -35,10 +35,14 @@ import PurchaseInvoicePage from './pages/PurchaseInvoicePage';
 // Layout Link Structures based on user credentials
 const STAFF_NAV_ITEMS = [
   { to: "/dashboard",           label: "Dashboard",       icon: "⊞" },
-  { to: "/",                    label: "Search Customer", icon: "🔍" },
+  { to: "/search",              label: "Search Customer", icon: "🔍" },
+  { to: "/register-customer",   label: "Register Customer", icon: "📝" },
+  { to: "/vendors",             label: "Vendors",          icon: "🏭" },
   { to: "/sell-parts",          label: "Sell Parts",      icon: "🛒" },
   { to: "/add-part",            label: "Add Part",        icon: "📦" },
-  { to: "/invoice",             label: "Invoice",         icon: "🧾" },
+  { to: "/parts",               label: "Parts",           icon: "📦" },
+  { to: "/invoices",            label: "Invoices",        icon: "🧾" },
+  { to: "/staff-reports",       label: "Staff Reports",   icon: "📊" },
 ];
 
 const ADMIN_NAV_ITEMS = [
@@ -46,7 +50,6 @@ const ADMIN_NAV_ITEMS = [
   { to: "/admin/staff-management",   label: "Manage Staff",     icon: "👥" },
   { to: "/admin/financial-reports",  label: "Finance Reports",  icon: "💰" },
   { to: "/admin/low-stock-alerts",   label: "Low Stock",        icon: "⚠️" },
-  { to: "/admin/register-customer",  label: "Reg Customer",     icon: "📝" },
 ];
 
 function Sidebar() {
@@ -140,22 +143,27 @@ function SharedShellLayout() {
         <div style={styles.content}>
           <Routes>
             {/* Staff Workflows */}
-            <Route path="/"               element={<SearchCustomer />} />
-            <Route path="/dashboard"      element={<StaffDashboard />} />
-            <Route path="/customers/:id"  element={<CustomerDetails />} />
-            <Route path="/sell-parts"     element={<SellParts />} />
-            <Route path="/add-part"       element={<AddPart />} />
-            <Route path="/invoice"        element={<InvoicePage />} />
-            <Route path="/invoice/:id"    element={<InvoicePage />} />
+            <Route path="/search"           element={<SearchCustomer />} />
+            <Route path="/dashboard"        element={<StaffDashboard />} />
+            <Route path="/register-customer" element={<RegisterCustomer />} />
+            <Route path="/vendors"           element={<VendorPage />} />
+            <Route path="/customers/:id"    element={<CustomerDetails />} />
+            <Route path="/sell-parts"       element={<SellParts />} />
+            <Route path="/add-part"         element={<AddPart />} />
+            <Route path="/parts"            element={<PartsPage />} />
+            <Route path="/staff-reports"    element={<StaffReports />} />
+            <Route path="/invoice"          element={<InvoicePage />} />
+            <Route path="/invoice/:id"      element={<InvoicePage />} />
 
             {/* Admin Workflows Nested in Shared Frame context */}
+            <Route path="/admin"                    element={<Dashboard />} />
             <Route path="/admin-dashboard"           element={<Dashboard />} />
             <Route path="/admin/staff-management"   element={<StaffManagement />} />
             <Route path="/admin/financial-reports"  element={<FinancialReports />} />
             <Route path="/admin/low-stock-alerts"   element={<LowStockAlerts />} />
             <Route path="/admin/notifications"      element={<Notifications />} />
             <Route path="/admin/staff-reports"      element={<StaffReports />} />
-            <Route path="/admin/register-customer"  element={<RegisterCustomer />} />
+            <Route path="/admin/register-customer" element={<Navigate to="/admin" replace />} />
             <Route path="/admin/pending-credit-reminders" element={<PendingCreditReminders />} />
           </Routes>
         </div>
@@ -200,14 +208,6 @@ function App() {
         <Route index element={<CustomerHistory />} />
       </Route>
 
-      {/* Dedicated structural layout prefix fallback definitions */}
-      <Route path="/admin" element={<SharedShellLayout />}>
-        <Route index element={<Dashboard />} />
-      </Route>
-
-      <Route path="/vendors" element={<VendorPage />} />
-      <Route path="/parts" element={<PartsPage />} />
-      <Route path="/invoices" element={<PurchaseInvoicePage />} />
       {/* Backwards-compat redirects: some UI still links to /invoice (singular) */}
       <Route path="/invoice" element={<Navigate to="/invoices" replace />} />
       <Route path="/invoice/:id" element={<Navigate to="/invoices" replace />} />

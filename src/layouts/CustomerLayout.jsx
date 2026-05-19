@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { User, CalendarClock, History, ShoppingCart, LogOut, Package } from "lucide-react";
-import { getCustomer, isLoggedIn, clearCustomer } from "../api/auth";
+import { getCustomer, isLoggedIn, clearSession } from "../api/auth";
 
 const navItems = [
   { label: "My Profile", icon: User, path: "/profile" },
@@ -19,8 +19,8 @@ export default function CustomerLayout() {
   }, [navigate]);
 
   const handleLogout = () => {
-    clearCustomer();
-    navigate("/login");
+    clearSession();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -81,6 +81,13 @@ export default function CustomerLayout() {
               <p className="text-sm font-semibold text-slate-900">{customer?.name || "Customer"}</p>
               <p className="text-xs text-slate-500">{customer?.email}</p>
             </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+            >
+              Logout
+            </button>
           </div>
         </header>
 

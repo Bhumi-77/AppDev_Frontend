@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import api from "../../api/axios";
+import { clearSession } from "../../api/auth";
 
 function AdminDashboard() {
   const currentYear = new Date().getFullYear();
@@ -12,6 +14,13 @@ function AdminDashboard() {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    clearSession();
+    navigate("/login", { replace: true });
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -41,11 +50,21 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-100 px-6 py-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="mt-2 text-gray-600">
-            Dynamic overview of staff and financial performance.
-          </p>
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="mt-2 text-gray-600">
+              Dynamic overview of staff and financial performance.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
         </div>
 
         {error && (

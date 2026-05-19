@@ -1,75 +1,310 @@
 import { useState } from "react";
-import axios from "../../api/axios";
 
-export default function StaffReports() {
-  const [type, setType] = useState("regulars");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [rows, setRows] = useState([]);
-  const [error, setError] = useState(null);
+const TABS = [
+  { id: "regulars", label: "Regular Customers" },
+  { id: "spenders", label: "High Spenders" },
+  { id: "credits", label: "Pending Credits" },
+];
 
-  async function generate() {
-    setLoading(true);
-    setError(null);
-    setRows([]);
-    try {
-      const q = new URLSearchParams({ type, from, to }).toString();
-      const res = await axios.get(`/reports/customers?${q}`);
-      setRows(res.data || []);
-    } catch (e) {
-      setError("Failed to load report. If backend is not running this will be empty.");
-    } finally {
-      setLoading(false);
-    }
+
+function Badge({ type }) {
+  const styles = {
+    Active: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    Inactive: "bg-slate-100 text-slate-500 border border-slate-200",
+    Critical: "bg-red-50 text-red-700 border border-red-200",
+    Overdue: "bg-amber-50 text-amber-700 border border-amber-200",
+    Pending: "bg-blue-50 text-blue-700 border border-blue-200",
+    Platinum: "bg-amber-50 text-amber-800 border border-amber-200",
+    Gold: "bg-blue-50 text-blue-700 border border-blue-200",
+    Silver: "bg-slate-100 text-slate-600 border border-slate-200",
+  };
+
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+        styles[type] || styles.Pending
+      }`}
+    >
+      {type}
+    </span>
+  );
+}
+
+function FormField({ label, children }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm";
+const selectCls =
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm";
+
+// REGULAR CUSTOMERS
+function RegularsPanel() {
+  const [result, setResult] = useState([]);
+
+  function generate() {
+    setResult(SAMPLE_REGULARS);
   }
 
   return (
-    <div style={{ fontFamily: "sans-serif" }}>
-      <h2 style={{ margin: 0, marginBottom: 12 }}>Customer Reports</h2>
+    <div>
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <FormField label="Customer Name">
+            <input className={inputCls} type="text" />
+          </FormField>
 
-      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
-        <select value={type} onChange={(e) => setType(e.target.value)} style={{ padding: 8, borderRadius: 8 }}>
-          <option value="regulars">Regular Customers</option>
-          <option value="high-spenders">High Spenders</option>
-          <option value="pending-credits">Pending Credits</option>
-        </select>
+          <FormField label="Minimum Visits">
+            <input className={inputCls} type="number" />
+          </FormField>
 
-        <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} style={{ padding: 8, borderRadius: 8 }} />
-        <input type="date" value={to} onChange={(e) => setTo(e.target.value)} style={{ padding: 8, borderRadius: 8 }} />
+          <FormField label="From Date">
+            <input className={inputCls} type="date" />
+          </FormField>
 
-        <button onClick={generate} style={{ padding: "8px 16px", borderRadius: 8, background: "#E6F1FB", color: "#0C447C", border: "none", cursor: "pointer" }}>
-          {loading ? "Generating..." : "Generate"}
+          <FormField label="To Date">
+            <input className={inputCls} type="date" />
+          </FormField>
+        </div>
+
+        <button
+          onClick={generate}
+          className="bg-slate-800 text-white px-5 py-2 rounded-xl"
+        >
+          Generate Report
         </button>
       </div>
 
-      {error && <p style={{ color: "#a32d2d" }}>{error}</p>}
-
-      <div style={{ background: "#fff", borderRadius: 8, padding: 12, border: "0.5px solid #e0e0e0" }}>
-        {rows.length === 0 ? (
-          <p style={{ color: "#888" }}>No results. Click Generate to run the report.</p>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      {result.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <table className="w-full text-sm">
             <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-                <th style={{ padding: 8 }}>Customer</th>
-                <th style={{ padding: 8 }}>Phone</th>
-                <th style={{ padding: 8 }}>Metric</th>
-                <th style={{ padding: 8 }}>Details</th>
+              <tr className="bg-slate-50">
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Customer ID</th>
+                <th className="p-3 text-left">Phone</th>
+                <th className="p-3 text-left">Visits</th>
+                <th className="p-3 text-left">Last Visit</th>
+                <th className="p-3 text-left">Status</th>
               </tr>
             </thead>
+
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} style={{ borderBottom: "1px solid #fafafa" }}>
-                  <td style={{ padding: 8 }}>{r.name}</td>
-                  <td style={{ padding: 8 }}>{r.phone}</td>
-                  <td style={{ padding: 8 }}>{r.metric ?? r.total ?? "-"}</td>
-                  <td style={{ padding: 8 }}>{r.details ?? "-"}</td>
+              {result.map((r) => (
+                <tr key={r.id} className="border-t">
+                  <td className="p-3">{r.name}</td>
+                  <td className="p-3">{r.id}</td>
+                  <td className="p-3">{r.phone}</td>
+                  <td className="p-3">{r.visits}</td>
+                  <td className="p-3">{r.last}</td>
+                  <td className="p-3">
+                    <Badge type={r.status} />
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// HIGH SPENDERS
+function SpendersPanel() {
+  const [result, setResult] = useState([]);
+
+  function generate() {
+    setResult(SAMPLE_SPENDERS);
+  }
+
+  function tier(i) {
+    if (i === 0) return "Platinum";
+    if (i === 1) return "Gold";
+    return "Silver";
+  }
+
+  return (
+    <div>
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <FormField label="Customer Name">
+            <input className={inputCls} type="text" />
+          </FormField>
+
+          <FormField label="Minimum Spend">
+            <input className={inputCls} type="number" />
+          </FormField>
+
+          <FormField label="Date">
+            <input className={inputCls} type="date" />
+          </FormField>
+        </div>
+
+        <button
+          onClick={generate}
+          className="bg-slate-800 text-white px-5 py-2 rounded-xl"
+        >
+          Generate Report
+        </button>
+      </div>
+
+      {result.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50">
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Customer ID</th>
+                <th className="p-3 text-left">Amount Spend</th>
+                <th className="p-3 text-left">Date</th>
+                <th className="p-3 text-left">Tier</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {result.map((r, i) => (
+                <tr key={r.id} className="border-t">
+                  <td className="p-3">{r.name}</td>
+                  <td className="p-3">{r.id}</td>
+                  <td className="p-3">{r.spent.toLocaleString()}</td>
+                  <td className="p-3">{r.date}</td>
+                  <td className="p-3">
+                    <Badge type={tier(i)} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// PENDING CREDITS
+function CreditsPanel() {
+  const [result, setResult] = useState([]);
+
+  function generate() {
+    setResult(SAMPLE_CREDITS);
+  }
+
+  return (
+    <div>
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <FormField label="Customer Name">
+            <input className={inputCls} type="text" />
+          </FormField>
+
+          <FormField label="Minimum Pending Amount">
+            <input className={inputCls} type="number" />
+          </FormField>
+
+          <FormField label="Credit Status">
+            <select className={selectCls}>
+              <option>All</option>
+              <option>Pending</option>
+              <option>Overdue</option>
+              <option>Critical</option>
+            </select>
+          </FormField>
+        </div>
+
+        <button
+          onClick={generate}
+          className="bg-slate-800 text-white px-5 py-2 rounded-xl"
+        >
+          Generate Report
+        </button>
+      </div>
+
+      {result.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50">
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Invoice No</th>
+                <th className="p-3 text-left">Invoice Date</th>
+                <th className="p-3 text-left">Due Date</th>
+                <th className="p-3 text-left">Total Amount</th>
+                <th className="p-3 text-left">Paid Amount</th>
+                <th className="p-3 text-left">Pending Amount</th>
+                <th className="p-3 text-left">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {result.map((r) => (
+                <tr key={r.id} className="border-t">
+                  <td className="p-3">{r.name}</td>
+                  <td className="p-3">{r.invoiceNo}</td>
+                  <td className="p-3">{r.invoiceDate}</td>
+                  <td className="p-3">{r.dueDate}</td>
+                  <td className="p-3">{r.total.toLocaleString()}</td>
+                  <td className="p-3">{r.paid.toLocaleString()}</td>
+                  <td className="p-3 text-red-600 font-semibold">
+                    {r.pending.toLocaleString()}
+                  </td>
+                  <td className="p-3">
+                    <Badge type={r.status} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// MAIN COMPONENT
+export default function CustomerReports() {
+  const [activeTab, setActiveTab] = useState("regulars");
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900">
+            Customer Reports
+          </h1>
+
+          <p className="text-sm text-slate-500">
+            Staff portal for generating customer reports
+          </p>
+        </div>
+
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                activeTab === tab.id
+                  ? "bg-slate-800 text-white"
+                  : "bg-white border border-slate-200 text-slate-600"
+              }`}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "regulars" && <RegularsPanel />}
+        {activeTab === "spenders" && <SpendersPanel />}
+        {activeTab === "credits" && <CreditsPanel />}
       </div>
     </div>
   );
