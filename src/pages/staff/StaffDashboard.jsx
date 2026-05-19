@@ -21,8 +21,10 @@ const styles = {
 
 const ACTIONS = [
   { to: "/", label: "Search customers", sub: "Find by name, phone, or plate", icon: "🔍", bg: "#E6F1FB" },
-  { to: "/sell-parts", label: "Sell parts", sub: "Create sales and invoices", icon: "🛒", bg: "#EAF3DE" },
-  { to: "/invoice", label: "Invoices", sub: "View and manage billing", icon: "🧾", bg: "#FAEEDA" },
+  { to: "/vendors", label: "Vendors", sub: "Manage suppliers and sources", icon: "🏭", bg: "#FFF4E6" },
+  { to: "/parts", label: "Parts", sub: "Browse and edit parts catalog", icon: "📦", bg: "#EAF3DE" },
+  { to: "/sell-parts", label: "Sell parts", sub: "Create sales and invoices", icon: "🛒", bg: "#E8F7FF" },
+  { to: "/invoices", label: "Invoices", sub: "View and manage billing", icon: "🧾", bg: "#FAEEDA" },
 ];
 
 export default function StaffDashboard() {
