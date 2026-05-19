@@ -7,8 +7,6 @@ import {
   getLowStockParts,
 } from "../api/partApi";
 import { getAllVendors } from "../api/vendorApi";
-// SideBar Layout
-import AdminLayout from "../components/AdminLayout";
 
 export default function PartsPage() {
   const [parts, setParts] = useState([]);
@@ -137,7 +135,6 @@ export default function PartsPage() {
   };
 
   return (
-    <AdminLayout>
       <div style={styles.contentPadding}>
         <div style={styles.pageHeader}>
           <div>
@@ -225,7 +222,6 @@ export default function PartsPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

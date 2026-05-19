@@ -110,11 +110,8 @@ function AppLayout() {
 }
 
 function App() {
-  // Navigation
   return (
-    <BrowserRouter>
-      <AppLayout />
-    </BrowserRouter>
+    <AppLayout />
   );
 }
 
