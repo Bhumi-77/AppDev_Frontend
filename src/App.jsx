@@ -27,8 +27,6 @@ import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerServices from "./pages/customer/CustomerServices";
 import CustomerHistory from "./pages/customer/CustomerHistory";
 import CustomerPurchase from "./pages/customer/CustomerPurchase";
-
-<<<<<<< HEAD
 // Vendor / Purchase Pages (incoming branch)
 import VendorPage from './pages/VendorPage';
 import PartsPage from './pages/PartsPage';
