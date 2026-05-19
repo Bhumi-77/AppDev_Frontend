@@ -23,6 +23,7 @@ import PendingCreditReminders from "./pages/Admin/PendingCreditReminders";
 // Customer Pages
 import CustomerSignup from "./pages/customer/CustomerSignup";
 import CustomerLogin from "./pages/customer/CustomerLogin";
+import CustomerLayout from "./layouts/CustomerLayout";
 import CustomerServices from "./pages/customer/CustomerServices";
 import CustomerHistory from "./pages/customer/CustomerHistory";
 import CustomerPurchase from "./pages/customer/CustomerPurchase";
@@ -185,7 +186,19 @@ function App() {
       {/* Auth Entry points */}
       <Route path="/login" element={<CustomerLogin />} />
       <Route path="/signup" element={<CustomerSignup />} />
-      <Route path="/profile" element={<Navigate to="/login" replace />} />
+
+      <Route path="/profile" element={<CustomerLayout />}>
+        <Route index element={<CustomerHistory />} />
+      </Route>
+      <Route path="/services" element={<CustomerLayout />}>
+        <Route index element={<CustomerServices />} />
+      </Route>
+      <Route path="/purchase" element={<CustomerLayout />}>
+        <Route index element={<CustomerPurchase />} />
+      </Route>
+      <Route path="/history" element={<CustomerLayout />}>
+        <Route index element={<CustomerHistory />} />
+      </Route>
 
       {/* Dedicated structural layout prefix fallback definitions */}
       <Route path="/admin" element={<SharedShellLayout />}>
@@ -195,6 +208,9 @@ function App() {
       <Route path="/vendors" element={<VendorPage />} />
       <Route path="/parts" element={<PartsPage />} />
       <Route path="/invoices" element={<PurchaseInvoicePage />} />
+      {/* Backwards-compat redirects: some UI still links to /invoice (singular) */}
+      <Route path="/invoice" element={<Navigate to="/invoices" replace />} />
+      <Route path="/invoice/:id" element={<Navigate to="/invoices" replace />} />
 
       {/* Catch-all global routing wrapper shell fall-through handling metrics */}
       <Route path="/*" element={<SharedShellLayout />} />
