@@ -1,5 +1,10 @@
-import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import './App.css'
+
+import VendorPage from './pages/VendorPage';
+import PartsPage from './pages/PartsPage';
+import PurchaseInvoicePage from './pages/PurchaseInvoicePage';
+
 import SearchCustomer from "./pages/staff/SearchCustomer"
 import CustomerDetails from "./pages/staff/CustomerDetails"
 import SellParts from "./pages/staff/SellParts.jsx"
@@ -10,8 +15,11 @@ import AddPart from "./pages/staff/Addparts.jsx"
 const NAV_ITEMS = [
   { to: "/dashboard",  label: "Dashboard",       icon: "⊞" },
   { to: "/",           label: "Search Customer", icon: "🔍" },
+  { to: "/vendors",    label: "Vendors",          icon: "🏭" }, 
+  { to: "/parts",      label: "Parts Management", icon: "📦" }, 
+  { to: "/invoices",   label: "Purchase Invoices",icon: "🧾" }, 
   { to: "/sell-parts", label: "Sell Parts",      icon: "🛒" },
-  { to: "/add-part",   label: "Add Part",        icon: "📦" },
+  { to: "/add-part",   label: "Add Part",        icon: "➕" }, 
   { to: "/invoice",    label: "Invoice",         icon: "🧾" },
 ];
 
@@ -90,6 +98,10 @@ function AppLayout() {
             <Route path="/invoice"       element={<InvoicePage />} />
             <Route path="/invoice/:id"   element={<InvoicePage />} />
             <Route path="/dashboard"     element={<StaffDashboard />} />
+            <Route path="/vendors"       element={<VendorPage />} />
+            <Route path="/parts"         element={<PartsPage />} />
+            <Route path="/invoices"      element={<PurchaseInvoicePage />} />
+            <Route path="*"              element={<Navigate to="/vendors" />} /> 
           </Routes>
         </div>
       </div>
@@ -99,9 +111,7 @@ function AppLayout() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppLayout />
-    </BrowserRouter>
+    <AppLayout />
   );
 }
 
