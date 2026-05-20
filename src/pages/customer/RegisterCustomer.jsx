@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
+import { saveCustomer, setAuthToken } from "../../api/auth";
 
 export default function RegisterCustomer() {
   const navigate = useNavigate();
@@ -20,7 +21,6 @@ export default function RegisterCustomer() {
     setLoading(true);
     setMessage("");
 
-    // Validation guard: Ensure required fields aren't just spaces
     const emailRegex = /^\S+@\S+\.\S+$/;
     if (!email.trim() || !emailRegex.test(email.trim())) {
       setMessageType("error");
@@ -43,11 +43,9 @@ export default function RegisterCustomer() {
       return;
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-
     const payload = {
       fullName: name.trim(),
-      email: normalizedEmail,
+      email: email.trim().toLowerCase(),
       phoneNumber: phone.trim(),
       password: password.trim(),
       vehicles: [
@@ -60,26 +58,46 @@ export default function RegisterCustomer() {
     };
 
     try {
-      await axios.post("/auth/register", payload);
+      const res = await axios.post("/auth/register", payload);
 
-      setMessageType("success");
-      setMessage("Customer added successfully.");
+      // Save minimal customer info
+      const created = res.data || {};
+      const savedCustomer = created?.user ?? { id: null, email: payload.email, fullName: payload.fullName };
+      saveCustomer(savedCustomer);
 
-      // Clear all fields for the next entry
-      setName("");
-      setPhone("");
-      setPassword("");
-      setEmail("");
-      setVehicleNumber("");
-      setVehicleMake("");
-      setVehicleYear("");
+      // Attempt auto-login
+      try {
+        const loginRes = await axios.post("/auth/login", {
+          email: payload.email,
+          password: payload.password,
+          role: "Customer",
+        });
 
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setMessage("");
-      }, 3000);
+        const data = loginRes.data || {};
+        const token = data.token ?? data.Token ?? data.accessToken ?? "";
+        const role = (data.role ?? data.Role ?? "customer").toLowerCase();
+        const user = data.user ?? data.User ?? savedCustomer || {};
+        const finalUserId = data.customerId ?? data.userId ?? user?.id ?? user?.Id ?? "";
 
+        if (token) {
+          sessionStorage.setItem("token", token);
+          setAuthToken(token);
+        }
+        sessionStorage.setItem("role", role);
+        if (finalUserId) sessionStorage.setItem("user_id", finalUserId);
+        if (user && Object.keys(user).length > 0) sessionStorage.setItem("user", JSON.stringify(user));
+
+        setMessageType("success");
+        setMessage("Registered and signed in. Redirecting to profile...");
+        setTimeout(() => navigate("/profile", { replace: true }), 800);
+      } catch (loginErr) {
+        console.error("Auto-login failed:", loginErr?.response ?? loginErr);
+        setMessageType("success");
+        setMessage("Customer registered. Please login with your email and password.");
+        setTimeout(() => navigate("/login", { replace: true }), 1000);
+      }
     } catch (error) {
+      console.error("Registration failed:", error?.response ?? error);
       setMessageType("error");
       setMessage(error.response?.data?.message || "Failed to register customer. Please check the details.");
     } finally {
@@ -111,7 +129,6 @@ export default function RegisterCustomer() {
       )}
 
       <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16, maxWidth: 640 }}>
-        {/* Customer Fields */}
         <div style={{ display: "grid", gap: 8 }}>
           <label style={{ fontSize: 14, fontWeight: 600 }}>Customer Name *</label>
           <input
@@ -160,7 +177,6 @@ export default function RegisterCustomer() {
           />
         </div>
 
-        {/* Mandatory Vehicle Fields Container */}
         <div style={{ padding: 16, borderRadius: 18, background: "#f8fafc", border: "1px solid #cbd5e1" }}>
           <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#0f172a" }}>Vehicle Details *</p>
           <p style={{ margin: "4px 0 16px", fontSize: 13, color: "#475569" }}>

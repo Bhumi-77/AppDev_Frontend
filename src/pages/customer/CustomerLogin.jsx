@@ -38,9 +38,9 @@ export default function CustomerLogin() {
     const endpoint = "/auth/login";
 
     const payload = {
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       password,
-      role: activeTab, // 👈 CRITICAL: Tells your C# Backend which role is logging in!
+      role: activeTab === "customer" ? "Customer" : activeTab,
     };
 
     try {
@@ -50,14 +50,14 @@ export default function CustomerLogin() {
       if (data?.success || data?.token) { // Accommodates various success flag schemes
         const token = data.token || data?.accessToken || "";
         const user = data.user || data?.customer || data?.staff || data?.admin || {};
-        const role = data.role || activeTab;
+        const role = (data.role || data?.Role || activeTab).toLowerCase();
         
         // Dynamically extract ID from the matching entity wrapper
         const finalUserId = data.customerId || data.userId || user?.id || user?._id || "";
 
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("role", role);
-        sessionStorage.setItem("user_id", finalUserId); // 👈 Safely assigns numeric ID or GUID fallback
+        sessionStorage.setItem("user_id", finalUserId);
         
         if (user && Object.keys(user).length > 0) {
           sessionStorage.setItem("user", JSON.stringify(user));
