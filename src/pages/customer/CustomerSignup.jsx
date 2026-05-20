@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 import { saveCustomer } from "../../api/auth";
 
-
 export default function CustomerSignup() {
   const [form, setForm] = useState({
     name: "",
@@ -28,34 +27,51 @@ export default function CustomerSignup() {
     setLoading(true);
     setMessage("");
 
+    // CORRECTED PAYLOAD: Matches your backend RegisterDto/ApplicationUser requirements
     const payload = {
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      vehicles: [
-        {
-          vehicleNumber: form.vehicleNumber.trim(),
-          make: form.make.trim(),
-          year: form.year ? parseInt(form.year, 10) : 0,
-        },
-      ],
+      fullName: form.name.trim(),
+      email: form.email.trim(),
+      phoneNumber: form.phone.trim(),
+      password: form.password, // Safely delivered to _userManager.CreateAsync
+      vehicles: form.vehicleNumber.trim() 
+        ? [
+            {
+              vehicleNumber: form.vehicleNumber.trim(),
+              make: form.make.trim(),
+              year: form.year ? parseInt(form.year, 10) : 0,
+            },
+          ]
+        : [],
     };
 
     try {
-      const response = await axios.post("/customers", payload);
+      // CORRECTED ENDPOINT: Routes directly to your ASP.NET Core Security Filter pipeline
+      const response = await axios.post("/auth/register", payload);
       const createdCustomer = response.data;
 
-      if (response.status === 201 && createdCustomer?.id) {
-        saveCustomer(createdCustomer);
+      // Identity endpoints return success flags or generated object links
+      if (response.status === 200 || response.status === 201 || createdCustomer?.success) {
+        // Fallback checks to keep your global session state intact
+        saveCustomer(createdCustomer?.customer || { name: form.name, email: form.email });
+        
         setMsgType("success");
-        setMessage("Registration successful! Redirecting to your profile...");
-        setTimeout(() => navigate("/profile"), 1000);
+        setMessage("Registration successful! Redirecting to login...");
+        
+        // Take them straight to the working login page
+        setTimeout(() => navigate("/login"), 1500);
       } else {
         setMsgType("error");
         setMessage(createdCustomer?.message || "Registration failed. Please try again.");
       }
     } catch (error) {
       setMsgType("error");
-      setMessage(error.response?.data?.message || "Failed to register. Please check your details.");
+      // Fallback display if password complexity rules or duplicate emails are flagged
+      const IdentityErrors = error.response?.data?.errors;
+      setMessage(
+        Array.isArray(IdentityErrors)
+          ? IdentityErrors.join(", ")
+          : error.response?.data?.message || "Failed to register. Ensure your password satisfies complexity criteria."
+      );
     } finally {
       setLoading(false);
     }
